@@ -1,0 +1,19 @@
+>>> cc
+
+".\App\src\UsrTimer.c", line 112: Warning:  #223-D: function "fabsf" declared implicitly
+              if (fabsf(current_error) > DEAD_ZONE_THRESHOLD) {
+                  ^
+".\App\src\UsrTimer.c", line 149: Warning:  #223-D: function "fabsf" declared implicitly
+              if (fabsf(avg_error) > DEAD_ZONE_THRESHOLD) {
+                  ^
+".\App\src\UsrTimer.c", line 226: Warning:  #223-D: function "fabsf" declared implicitly
+              if (fabsf(current_error) > DEAD_ZONE_THRESHOLD) {
+                  ^
+".\App\src\UsrTimer.c", line 244: Warning:  #1-D: last line of file ends without a newline
+  }
+   ^
+.\App\src\UsrTimer.c: 4 warnings, 0 errors
+
+>>> ld
+
+Program Size: Code=17000 RO-data=3336 RW-data=804 ZI-data=2468  
