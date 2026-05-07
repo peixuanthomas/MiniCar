@@ -1,87 +1,88 @@
 /**
   ******************************************************************************
   * @file           : Motor.c
-  * @brief          : µç»ú¿ØÖÆCÎÄ¼ş
+  * @brief          : ç”µæœºé©±åŠ¨Cæ–‡ä»¶
   ******************************************************************************
   * @attention
   *
-  * Copyright (c) ÉÏº£Ê¦·¶´óÑ§ 2025-2035
+  * Copyright (c) ä¸Šæµ·å¸ˆèŒƒå¤§å­¦ 2025-2035
   * All rights reserved.
   *
-  * ±¾³ÌĞòÖ»¹©Ñ§Ï°Ê¹ÓÃ£¬Î´¾­×÷ÕßĞí¿É£¬²»µÃÓÃÓÚÆäËüÈÎºÎÓÃÍ¾
-  * ÉÏº£Ê¦·¶´óÑ§ ĞÅÏ¢Óë»úµç¹¤³ÌÑ§Ôº Í¨ĞÅ¹¤³Ì×¨Òµ
-  * ¿ªÔ´µØÖ·£ºhttps://gitee.com/NEagle
-  * ĞŞ¸ÄÈÕÆÚ£º2025/12/06
-  * °æ±¾£º V1.0
-  * °æÈ¨ËùÓĞ£¬µÁ°æ±Ø¾¿
-  * V1.0ĞŞ¸ÄËµÃ÷
+  * æœ¬ä»£ç ä»…é™å­¦ä¹ ä½¿ç”¨ï¼Œæœªç»ä½œè€…è®¸å¯ï¼Œä¸å¾—ç”¨äºå…¶å®ƒä»»ä½•ç”¨é€”
+  * ä¸Šæµ·å¸ˆèŒƒå¤§å­¦ ä¿¡æ¯ä¸æœºç”µå·¥ç¨‹å­¦é™¢ é€šä¿¡å·¥ç¨‹ä¸“ä¸š
+  * å¼€æºåœ°å€ï¼šhttps://gitee.com/NEagle
+  * ä¿®æ”¹æ—¥æœŸï¼š2025/12/06
+  * ç‰ˆæœ¬ï¼š V1.0
+  * ç‰ˆæƒæ‰€æœ‰ï¼Œè¿è€…å¿…ç©¶
+  * V1.0ä¿®æ”¹è¯´æ˜
   *
   ******************************************************************************
   */
 #include "Motor.h"
 
-extern TIM_HandleTypeDef htim3;	// PWM¶¨Ê±Æ÷¾ä±ú£¬ÓÃÓÚ¿ØÖÆµç»úPWMÊä³ö
+extern TIM_HandleTypeDef htim3;
 extern TIM_HandleTypeDef htim4;
 
-// ´´½¨µç»ú¿ØÖÆÊµÀı
+// ç”µæœºæ§åˆ¶å¯¹è±¡å®ä¾‹
 MotorControl_t motor_left = {
-    .pwm_timer = &htim3,              // Ö¸ÏòTIM3¶¨Ê±Æ÷¾ä±ú
-    .pwm_channel1 = TIM_CHANNEL_2,    // TIM3_CH1 -> PB4
+    .pwm_timer = &htim3,
+    .pwm_channel = TIM_CHANNEL_2,
+    .dir_port = GPIOB,
+    .dir_pin = GPIO_PIN_4,
 };
 
 MotorControl_t motor_right = {
-    .pwm_timer = &htim4,              // Ö¸ÏòTIM4¶¨Ê±Æ÷¾ä±ú
-    .pwm_channel1 = TIM_CHANNEL_1,    // TIM4_CH1 -> PB6
+    .pwm_timer = &htim4,
+    .pwm_channel = TIM_CHANNEL_1,
+    .dir_port = GPIOB,
+    .dir_pin = GPIO_PIN_7,
 };
 
-/* º¯ÊıÉùÃ÷ */
-void SystemClock_Config(void);        // ÏµÍ³Ê±ÖÓÅäÖÃº¯ÊıÉùÃ÷
-//static void MX_GPIO_Init(void);       // GPIO³õÊ¼»¯º¯ÊıÉùÃ÷
-//static void MX_TIM3_Init(void);       // TIM3¶¨Ê±Æ÷³õÊ¼»¯º¯ÊıÉùÃ÷
-void HAL_MspInit(void);               // HAL¿âMSP³õÊ¼»¯º¯ÊıÉùÃ÷
-void HAL_TIM_MspInit(TIM_HandleTypeDef* tim_handle);  // TIM MSP³õÊ¼»¯º¯ÊıÉùÃ÷
+void SystemClock_Config(void);
+void HAL_MspInit(void);
+void HAL_TIM_MspInit(TIM_HandleTypeDef* tim_handle);
 
-// µç»ú¿ØÖÆº¯ÊıÉùÃ÷
-void Motor_Init(MotorControl_t *motor);       // µç»ú³õÊ¼»¯º¯ÊıÉùÃ÷
-void Motor_Stop(MotorControl_t *motor);       // µç»úÍ£Ö¹º¯ÊıÉùÃ÷
-float Motor_GetSpeedRPM(MotorControl_t *motor); // »ñÈ¡µç»ú×ªËÙº¯ÊıÉùÃ÷
-void Encoder_Reset(MotorControl_t *motor);    // ±àÂëÆ÷ÇåÁãº¯ÊıÉùÃ÷
+void Motor_Init(MotorControl_t *motor);
+void Motor_Stop(MotorControl_t *motor);
+float Motor_GetSpeedRPM(MotorControl_t *motor);
+void Encoder_Reset(MotorControl_t *motor);
 
-// ±àÂëÆ÷Ïà¹Øº¯Êı
-void Encoder_Init(void);              // ±àÂëÆ÷³õÊ¼»¯º¯ÊıÉùÃ÷
-void Encoder_IRQHandler(void);        // ±àÂëÆ÷ÖĞ¶Ï´¦Àíº¯ÊıÉùÃ÷
-int8_t Encoder_GetDirection(uint8_t prev_a, uint8_t prev_b, uint8_t curr_a, uint8_t curr_b); // »ñÈ¡±àÂëÆ÷·½Ïòº¯ÊıÉùÃ÷
+void Encoder_Init(void);
+void Encoder_IRQHandler(void);
+int8_t Encoder_GetDirection(uint8_t prev_a, uint8_t prev_b, uint8_t curr_a, uint8_t curr_b);
 
-void InitMotor(void)					// Ö÷º¯Êı¶¨Òå
+void InitMotor(void)
 {
+    Motor_Stop(&motor_left);
+    Motor_Stop(&motor_right);
 
-    // ³õÊ¼»¯µç»ú¿ØÖÆ
-    Motor_Stop(&motor_left);                  // µ÷ÓÃÍ£Ö¹µç»úº¯Êı
-    Motor_Stop(&motor_right);                  // µ÷ÓÃÍ£Ö¹µç»úº¯Êı
+    ResetLeftIn2();	// PB4=0, forward direction
+    HAL_TIM_PWM_Start(motor_left.pwm_timer, motor_left.pwm_channel);
 
-    // Æô¶¯PWMÊä³ö
-	ResetLeftIn2();	// PB4ÉèÖÃÎª0
-    HAL_TIM_PWM_Start(motor_left.pwm_timer, motor_left.pwm_channel1);  // Æô¶¯TIM3_CH1µÄPWMÊä³ö
-	
-	ResetRightIn2();	//PB7ÉèÖÃÎª0
-    HAL_TIM_PWM_Start(motor_right.pwm_timer, motor_right.pwm_channel1);  // Æô¶¯TIM3_CH1µÄPWMÊä³ö
-
+    ResetRightIn2();	// PB7=0, forward direction
+    HAL_TIM_PWM_Start(motor_right.pwm_timer, motor_right.pwm_channel);
 }
 
-// ÉèÖÃµç»úËÙ¶È (-999 µ½ +999£¬¸ºÊıÎª·´×ª)
-void Motor_SetSpeed(MotorControl_t *motor, int16_t speed_percent)  // ÉèÖÃµç»úËÙ¶Èº¯ÊıÊµÏÖ
+// è®¾ç½®ç”µæœºé€Ÿåº¦ (-999 ~ +999ï¼Œè´Ÿå€¼ä¸ºåè½¬)
+void Motor_SetSpeed(MotorControl_t *motor, int16_t speed_percent)
 {
-    // ÏŞÖÆËÙ¶È·¶Î§
-	if(speed_percent < 0) return;
-    if(speed_percent > 999) speed_percent = 999;  // ËÙ¶ÈÉÏÏŞÎª99.9%
+    // é™å¹…
+    if (speed_percent > 999) speed_percent = 999;
+    if (speed_percent < -999) speed_percent = -999;
 
-	__HAL_TIM_SET_COMPARE(motor->pwm_timer,motor->pwm_channel1, speed_percent);
+    if (speed_percent >= 0) {
+        // æ­£è½¬ï¼šæ–¹å‘å¼•è„šå¤ä½
+        HAL_GPIO_WritePin(motor->dir_port, motor->dir_pin, GPIO_PIN_RESET);
+        __HAL_TIM_SET_COMPARE(motor->pwm_timer, motor->pwm_channel, speed_percent);
+    } else {
+        // åè½¬ï¼šæ–¹å‘å¼•è„šç½®ä½ï¼ŒPWMå–ç»å¯¹å€¼
+        HAL_GPIO_WritePin(motor->dir_port, motor->dir_pin, GPIO_PIN_SET);
+        __HAL_TIM_SET_COMPARE(motor->pwm_timer, motor->pwm_channel, -speed_percent);
+    }
 }
 
-// Í£Ö¹µç»ú
-void Motor_Stop(MotorControl_t *motor)  // Í£Ö¹µç»úº¯ÊıÊµÏÖ
+// åœæ­¢ç”µæœº
+void Motor_Stop(MotorControl_t *motor)
 {
-    // ÉèÖÃÁ½¸öPWMÕ¼¿Õ±ÈÎª0
-    __HAL_TIM_SET_COMPARE(motor->pwm_timer, motor->pwm_channel1, 0); // ÉèÖÃPB4µÄPWMÕ¼¿Õ±ÈÎª0
+    __HAL_TIM_SET_COMPARE(motor->pwm_timer, motor->pwm_channel, 0);
 }
-

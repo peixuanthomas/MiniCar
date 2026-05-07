@@ -1,20 +1,20 @@
 /**
   ******************************************************************************
   * @file           : Motor.h
-  * @brief          : µç»ú¿ØÖÆÍ·ÎÄ¼ş
+  * @brief          : ç”µæœºé©±åŠ¨å¤´æ–‡ä»¶
   ******************************************************************************
   * @attention
   *
-  * Copyright (c) ÉÏº£Ê¦·¶´óÑ§ 2025-2035
+  * Copyright (c) ä¸Šæµ·å¸ˆèŒƒå¤§å­¦ 2025-2035
   * All rights reserved.
   *
-  * ±¾³ÌĞòÖ»¹©Ñ§Ï°Ê¹ÓÃ£¬Î´¾­×÷ÕßĞí¿É£¬²»µÃÓÃÓÚÆäËüÈÎºÎÓÃÍ¾
-  * ÉÏº£Ê¦·¶´óÑ§ ĞÅÏ¢Óë»úµç¹¤³ÌÑ§Ôº Í¨ĞÅ¹¤³Ì×¨Òµ
-  * ¿ªÔ´µØÖ·£ºhttps://gitee.com/NEagle
-  * ĞŞ¸ÄÈÕÆÚ£º2025/12/06
-  * °æ±¾£º V1.0
-  * °æÈ¨ËùÓĞ£¬µÁ°æ±Ø¾¿
-  * V1.0ĞŞ¸ÄËµÃ÷
+  * æœ¬ä»£ç ä»…é™å­¦ä¹ ä½¿ç”¨ï¼Œæœªç»ä½œè€…è®¸å¯ï¼Œä¸å¾—ç”¨äºå…¶å®ƒä»»ä½•ç”¨é€”
+  * ä¸Šæµ·å¸ˆèŒƒå¤§å­¦ ä¿¡æ¯ä¸æœºç”µå·¥ç¨‹å­¦é™¢ é€šä¿¡å·¥ç¨‹ä¸“ä¸š
+  * å¼€æºåœ°å€ï¼šhttps://gitee.com/NEagle
+  * ä¿®æ”¹æ—¥æœŸï¼š2025/12/06
+  * ç‰ˆæœ¬ï¼š V1.0
+  * ç‰ˆæƒæ‰€æœ‰ï¼Œè¿è€…å¿…ç©¶
+  * V1.0ä¿®æ”¹è¯´æ˜
   *
   ******************************************************************************
   */
@@ -27,29 +27,29 @@ extern "C" {
 
 #include "stm32f1xx_hal.h"
 
-#define MOTOR_PWM_PORT    GPIOB       // PWM¿ØÖÆ¶Ë¿Ú¶¨ÒåÎªGPIOB
-#define ENCODER_PORT      GPIOB       // ±àÂëÆ÷¶Ë¿Ú¶¨ÒåÎªGPIOB
+#define MOTOR_PWM_PORT    GPIOB       // PWMæ§åˆ¶ç«¯å£å®šä¹‰ä¸ºGPIOB
+#define ENCODER_PORT      GPIOB       // ç¼–ç å™¨ç«¯å£å®šä¹‰ä¸ºGPIOB
 
-//×óÂÖ¶¨Òå
+//å·¦è½®æ–¹å‘
 #define SetLeftIn2()	HAL_GPIO_WritePin(GPIOB, GPIO_PIN_4, GPIO_PIN_SET)
 #define ResetLeftIn2()	HAL_GPIO_WritePin(GPIOB, GPIO_PIN_4, GPIO_PIN_RESET)
 
-//ÓÒÂÖ¶¨Òå
+//å³è½®æ–¹å‘
 #define SetRightIn2()	HAL_GPIO_WritePin(GPIOB, GPIO_PIN_7, GPIO_PIN_SET)
 #define ResetRightIn2()	HAL_GPIO_WritePin(GPIOB, GPIO_PIN_7, GPIO_PIN_RESET)
 
-// ¶¨ÒåPWM²ÎÊı
-//#define PWM_PERIOD        1000  // PWMÖÜÆÚÖµ£¬ÓÃÓÚÉèÖÃPWMÕ¼¿Õ±È¼ÆËã
-
-// µç»ú¿ØÖÆ½á¹¹Ìå
+// ç”µæœºæ§åˆ¶ç»“æ„ä½“
 typedef struct {
-    TIM_HandleTypeDef *pwm_timer;     // PWM¶¨Ê±Æ÷¾ä±ú£¬ÓÃÓÚ¿ØÖÆµç»úËÙ¶È
-    uint32_t pwm_channel1;            // PWMÍ¨µÀ1 (PB4 - TIM3_CH1)
-} MotorControl_t;                     // µç»ú¿ØÖÆ½á¹¹Ìå¶¨Òå
+    TIM_HandleTypeDef *pwm_timer;     // PWMå®šæ—¶å™¨æŒ‡é’ˆ
+    uint32_t pwm_channel;             // PWMé€šé“
+    GPIO_TypeDef *dir_port;           // æ–¹å‘å¼•è„šç«¯å£
+    uint16_t dir_pin;                 // æ–¹å‘å¼•è„šç¼–å·
+} MotorControl_t;
+
 extern MotorControl_t motor_left;
 extern MotorControl_t motor_right;
-void InitMotor(void);					// Ö÷º¯Êı¶¨Òå
-void Motor_SetSpeed(MotorControl_t *motor, int16_t speed_percent);  // ÉèÖÃµç»úËÙ¶Èº¯ÊıÊµÏÖ
+void InitMotor(void);
+void Motor_SetSpeed(MotorControl_t *motor, int16_t speed_percent);
 
 #ifdef __cplusplus
 }

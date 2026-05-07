@@ -1,20 +1,19 @@
 /**
   ******************************************************************************
   * @file           : UsrTimer.c
-  * @brief          : ¶¨Ê±Æ÷ÓÃ»§Èë¿Ú
+  * @brief          : å®šæ—¶å™¨ç”¨æˆ·å›è°ƒ â€” PID å¾ªè¿¹æ§åˆ¶
   ******************************************************************************
   * @attention
   *
-  * Copyright (c) ÉÏº£Ê¦·¶´óÑ§ 2025-2035
+  * Copyright (c) ä¸Šæµ·å¸ˆèŒƒå¤§å­¦ 2025-2035
   * All rights reserved.
   *
-  * ±¾³ÌĞòÖ»¹©Ñ§Ï°Ê¹ÓÃ£¬Î´¾­×÷ÕßĞí¿É£¬²»µÃÓÃÓÚÆäËüÈÎºÎÓÃÍ¾
-  * ÉÏº£Ê¦·¶´óÑ§ ĞÅÏ¢Óë»úµç¹¤³ÌÑ§Ôº Í¨ĞÅ¹¤³Ì×¨Òµ
-  * ¿ªÔ´µØÖ·£ºhttps://gitee.com/NEagle
-  * ĞŞ¸ÄÈÕÆÚ£º2025/12/10
-  * °æ±¾£º V1.0
-  * °æÈ¨ËùÓĞ£¬µÁ°æ±Ø¾¿
-  * V1.0ĞŞ¸ÄËµÃ÷
+  * æœ¬ä»£ç ä»…é™å­¦ä¹ ä½¿ç”¨ï¼Œæœªç»ä½œè€…è®¸å¯ï¼Œä¸å¾—ç”¨äºå…¶å®ƒä»»ä½•ç”¨é€”
+  * ä¸Šæµ·å¸ˆèŒƒå¤§å­¦ ä¿¡æ¯ä¸æœºç”µå·¥ç¨‹å­¦é™¢ é€šä¿¡å·¥ç¨‹ä¸“ä¸š
+  * å¼€æºåœ°å€ï¼šhttps://gitee.com/NEagle
+  * ä¿®æ”¹æ—¥æœŸï¼š2026/05/07
+  * ç‰ˆæœ¬ï¼š V2.0 (8-sensor PID)
+  * ç‰ˆæƒæ‰€æœ‰ï¼Œè¿è€…å¿…ç©¶
   *
   ******************************************************************************
   */
@@ -22,229 +21,157 @@
 #include "UsrTimer.h"
 #include "stdio.h"
 #include <stdbool.h>
-#include <math.h>
 
 extern volatile uint8_t runFlag;
 extern volatile uint8_t oledProductMode;
 
-// ĞŞÕı´«¸ĞÆ÷Ó³Éä£¨¸ù¾İÄãÖ®Ç°µÄPID´úÂë£©
-// ÕıÈ·µÄÓ¦¸ÃÊÇ£ºSen0=×î×ó£¬Sen1=×ó£¬Sen2=ÖĞ£¬Sen3=ÓÒ£¬Sen4=×îÓÒ
-// µ«Äãµ±Ç°´úÂëµÄÃüÃûÊÇ·´µÄ£¬ÎÒ°´ÕıÈ·Ë³ĞòĞŞÕı
+/* ==================== PID å¯è°ƒå‚æ•° ==================== */
+#define BASE_SPEED        450     // åŸºç¡€é€Ÿåº¦ (0-999)
+#define MIN_SPEED         200     // æœ€ä½é€Ÿåº¦
+#define MAX_SPEED         750     // æœ€é«˜é€Ÿåº¦
 
-// ËÙ¶È²ÎÊı£¨¸ù¾İÄãÖ®Ç°PID´úÂëµÄËÙ¶È·¶Î§µ÷Õû£©
-#define BASE_SPEED     450
-#define MIN_SPEED      250
-#define MAX_SPEED      750
-#define TURN_SPEED     420
-#define SHARP_TURN     480
+#define KP                28.0f   // æ¯”ä¾‹å¢ç›Š
+#define KI                0.3f    // ç§¯åˆ†å¢ç›Š
+#define KD                65.0f   // å¾®åˆ†å¢ç›Š
+#define INTEGRAL_MAX      40.0f   // ç§¯åˆ†é™å¹… (anti-windup)
+#define MAX_CORRECTION    300     // è¾“å‡ºä¿®æ­£é™å¹…
 
-// Ö±ĞĞÎ¢µ÷²ÎÊı£¨½â¾öÖØĞÄ²»ÎÈÎÊÌâ£©
-#define STRAIGHT_ADJUST_GAIN   30   // Ö±ĞĞÎ¢µ÷ÔöÒæ
-#define DEAD_ZONE_THRESHOLD    0.2f // ËÀÇøãĞÖµ£¬Ğ¡ÓÚ´ËÖµ²»µ÷Õû
-#define MAX_STRAIGHT_ADJUST    80   // ×î´óÖ±ĞĞµ÷ÕûÁ¿
+#define LOST_LINE_TIMEOUT 30      // ä¸¢çº¿è¶…æ—¶ (Ã—0.5ms â‰ˆ 15ms)
+#define SEARCH_SPEED      250     // ä¸¢çº¿å¯»çº¿æ—‹è½¬é€Ÿåº¦
 
-// ·ÀÆ«ÒÆ¼ÇÒä
-static float history_error[3] = {0, 0, 0}; // ¼ÇÂ¼×î½ü3´ÎµÄÎó²î
-static int error_index = 0;
+/* ==================== ä¼ æ„Ÿå™¨ä½ç½®æƒé‡ ==================== */
+// Sen0(PA7,æœ€å³)=+7 ... Sen7(PA0,æœ€å·¦)=-7ï¼ŒæŒ‰ä¼ æ„Ÿå™¨ç¼–å·ç´¢å¼•
+static const int8_t sensor_pos[8] = {7, 5, 3, 1, -1, -3, -5, -7};
 
-void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
+/* ==================== PID çŠ¶æ€å˜é‡ ==================== */
+static float integral     = 0.0f;
+static float last_error   = 0.0f;
+static float saved_error  = 0.0f;   // ä¸¢çº¿æ—¶ä¿å­˜çš„æœ€åæœ‰æ•ˆè¯¯å·®
+static int   lost_counter = 0;
+
+static inline int clamp(int val, int lo, int hi)
 {
-    if (htim->Instance == TIM1)  // ¼ì²éÊÇTIM1¶¨Ê±Æ÷
-    {
-        if (oledProductMode) {
-            return;
-        }
+    if (val < lo) return lo;
+    if (val > hi) return hi;
+    return val;
+}
 
-        OLED_ShowNum(48, 0, runFlag, 1, OLED_8X16); // ÏÔÊ¾ÔËĞĞ×´Ì¬
+static inline float clampf(float val, float lo, float hi)
+{
+    if (val < lo) return lo;
+    if (val > hi) return hi;
+    return val;
+}
 
-        if (runFlag == 0) { // Î´Æô¶¯£¬±£³ÖÍ£Ö¹
-            Motor_SetSpeed(&motor_left, 0);
-            Motor_SetSpeed(&motor_right, 0);
-            return;
-        }
-        
-        // ĞŞÕı´«¸ĞÆ÷ÃüÃû£¨¸ù¾İÖ®Ç°µÄPID´úÂë£©
-        // ÄãÖ®Ç°µÄPID´úÂëÖĞ£ºSenLLÊÇ×î×ó£¬SenLÊÇ×ó£¬SenMidÊÇÖĞ£¬SenRÊÇÓÒ£¬SenRRÊÇ×îÓÒ
-        // ËùÒÔÕâÀïÓ¦¸ÃÕâÑùÓ³Éä£º
-        bool SenRR = GetSen0Val();  // ×î×ó´«¸ĞÆ÷
-        bool SenR  = GetSen1Val();  // ×ó´«¸ĞÆ÷
-        bool SenMid= GetSen2Val();  // ÖĞ¼ä´«¸ĞÆ÷
-        bool SenL  = GetSen3Val();  // ÓÒ´«¸ĞÆ÷
-        bool SenLL = GetSen4Val();  // ×îÓÒ´«¸ĞÆ÷
+/**
+  * @brief  è¯»å–å…¨éƒ¨8è·¯ä¼ æ„Ÿå™¨ï¼Œè®¡ç®—è´¨å¿ƒè¯¯å·®
+  * @param  error  è¾“å‡ºè¯¯å·®å€¼ï¼ˆ0=æ­£ä¸­ï¼Œè´Ÿ=åå·¦ï¼Œæ­£=åå³ï¼‰
+  * @param  count  è¾“å‡ºæ£€æµ‹åˆ°é»‘çº¿çš„ä¼ æ„Ÿå™¨æ•°é‡
+  */
+static void calc_sensor_error(float *error, int *count)
+{
+    bool sen[8];
+    sen[0] = !GetSen0Val();  // 0=é»‘çº¿ â†’ true
+    sen[1] = !GetSen1Val();
+    sen[2] = !GetSen2Val();
+    sen[3] = !GetSen3Val();
+    sen[4] = !GetSen4Val();
+    sen[5] = !GetSen5Val();
+    sen[6] = !GetSen6Val();
+    sen[7] = !GetSen7Val();
 
-        char steer[3] = {' ', ' ', '\0'};  // ×ªÏòÏÔÊ¾
-        
-        // ¼ÆËãµ±Ç°Îó²î£¨ÓÃÓÚÖ±ĞĞÎ¢µ÷£©
-        // ´«¸ĞÆ÷Öµ£º1=°×É«£¨ÎŞ·´Éä£©£¬0=ºÚÉ«£¨ÓĞ·´Éä£©
-        // Îó²î¼ÆËã£º¸ºÖµ±íÊ¾Æ«×ó£¬ÕıÖµ±íÊ¾Æ«ÓÒ
-        float current_error = 0.0f;
-        int active_count = 0;
-        
-        if (SenLL == 0) { current_error -= 2.0f; active_count++; } // ×î×óºÚÏß£¬³µÆ«ÓÒ
-        if (SenL == 0)  { current_error -= 1.0f; active_count++; } // ×óºÚÏß£¬³µÉÔÆ«ÓÒ
-        if (SenMid == 0){ current_error += 0.0f; active_count++; } // ÖĞ¼äºÚÏß£¬¾ÓÖĞ
-        if (SenR == 0)  { current_error += 1.0f; active_count++; } // ÓÒºÚÏß£¬³µÉÔÆ«×ó
-        if (SenRR == 0) { current_error += 2.0f; active_count++; } // ×îÓÒºÚÏß£¬³µÆ«×ó
-        
-        // ¼ÆËãÆ½¾ùÎó²î
-        if (active_count > 0) {
-            current_error = current_error / active_count;
+    int sum_pos = 0;
+    int cnt = 0;
+
+    for (int i = 0; i < 8; i++) {
+        if (sen[i]) {
+            sum_pos += sensor_pos[i];
+            cnt++;
         }
-        
-        // ´æ´¢ÀúÊ·Îó²î
-        history_error[error_index] = current_error;
-        error_index = (error_index + 1) % 3;
-        
-        // ¼ÆËãÆ½¾ùÀúÊ·Îó²î£¨ÓÃÓÚ¼ì²â³¤ÆÚÆ«ÒÆÇ÷ÊÆ£©
-        float avg_error = 0.0f;
-        for (int i = 0; i < 3; i++) {
-            avg_error += history_error[i];
-        }
-        avg_error /= 3.0f;
-        
-        // ¼òµ¥ãĞÖµÑ²ÏßËã·¨£¨ÔöÇ¿°æ£¬¼ÓÈëÖ±ĞĞÎ¢µ÷£©
-        
-        // Çé¿ö1£ºÀíÏëÖ±ĞĞ£¨ÖĞ¼äºÍ×óÓÒ¶¼ÓĞºÚÏß£©
-        if (SenMid == 0 && SenL == 0 && SenR == 0) {
-            steer[0] = 'S'; steer[1] = ' ';
-            
-            // ÖØĞÄ²»ÎÈ´¦Àí£º¸ù¾İÎó²î½øĞĞÎ¢µ÷
-            int left_speed = BASE_SPEED;
-            int right_speed = BASE_SPEED;
-            
-            // Èç¹ûÎó²î¾ø¶ÔÖµ³¬¹ıËÀÇøãĞÖµ£¬½øĞĞÎ¢µ÷
-            if (fabsf(current_error) > DEAD_ZONE_THRESHOLD) {
-                int adjust = (int)(current_error * STRAIGHT_ADJUST_GAIN);
-                
-                // ÏŞÖÆµ÷Õû·ù¶È
-                if (adjust > MAX_STRAIGHT_ADJUST) adjust = MAX_STRAIGHT_ADJUST;
-                if (adjust < -MAX_STRAIGHT_ADJUST) adjust = -MAX_STRAIGHT_ADJUST;
-                
-                // µ÷Õû×óÓÒÂÖËÙ¶È£¨Îó²îÎªÕıÊ±³µÆ«×ó£¬ĞèÒª×óÂÖ¼ÓËÙ/ÓÒÂÖ¼õËÙ£©
-                left_speed = BASE_SPEED - adjust;  // ×¢Òâ£ºcurrent_errorÕı=Æ«×ó£¬ËùÒÔ×óÂÖÒª¼õËÙ
-                right_speed = BASE_SPEED + adjust; // ÓÒÂÖÒª¼ÓËÙ
-                
-                // ÏÔÊ¾Î¢µ÷·½Ïò
-                if (adjust > 0) {
-                    steer[0] = 'L'; steer[1] = 'm';  // Î¢×óµ÷
-                } else if (adjust < 0) {
-                    steer[0] = 'R'; steer[1] = 'm';  // Î¢ÓÒµ÷
-                }
-            }
-            
-            // ÏŞ·ù
-            if (left_speed < MIN_SPEED) left_speed = MIN_SPEED;
-            if (right_speed < MIN_SPEED) right_speed = MIN_SPEED;
-            if (left_speed > MAX_SPEED) left_speed = MAX_SPEED;
-            if (right_speed > MAX_SPEED) right_speed = MAX_SPEED;
-            
-            Motor_SetSpeed(&motor_left, left_speed);
-            Motor_SetSpeed(&motor_right, right_speed);
-        }
-        // Çé¿ö2£º±ê×¼Ö±ĞĞ£¨×óÓÒ¶¼ÓĞºÚÏß£¬ÖĞ¼ä¿ÉÄÜÃ»ÓĞ£©
-        else if (SenL == 0 && SenR == 0) {
-            steer[0] = 'S'; steer[1] = ' ';
-            
-            // ±ê×¼Ö±ĞĞ£¬µ«¼ÓÈë·ÀÆ«ÒÆ²¹³¥
-            int left_speed = BASE_SPEED;
-            int right_speed = BASE_SPEED;
-            
-            // Ê¹ÓÃÆ½¾ùÀúÊ·Îó²î½øĞĞ²¹³¥£¬·ÀÖ¹ÀÛ»ıÆ«ÒÆ
-            if (fabsf(avg_error) > DEAD_ZONE_THRESHOLD) {
-                int adjust = (int)(avg_error * (STRAIGHT_ADJUST_GAIN / 2));
-                
-                if (adjust > MAX_STRAIGHT_ADJUST/2) adjust = MAX_STRAIGHT_ADJUST/2;
-                if (adjust < -MAX_STRAIGHT_ADJUST/2) adjust = -MAX_STRAIGHT_ADJUST/2;
-                
-                left_speed -= adjust;
-                right_speed += adjust;
-                
-                if (adjust > 0) {
-                    steer[0] = 'L'; steer[1] = 'c';  // ²¹³¥×óµ÷
-                } else if (adjust < 0) {
-                    steer[0] = 'R'; steer[1] = 'c';  // ²¹³¥ÓÒµ÷
-                }
-            }
-            
-            // ÏŞ·ù
-            if (left_speed < MIN_SPEED) left_speed = MIN_SPEED;
-            if (right_speed < MIN_SPEED) right_speed = MIN_SPEED;
-            if (left_speed > MAX_SPEED) left_speed = MAX_SPEED;
-            if (right_speed > MAX_SPEED) right_speed = MAX_SPEED;
-            
-            Motor_SetSpeed(&motor_left, left_speed);
-            Motor_SetSpeed(&motor_right, right_speed);
-        }
-        // Çé¿ö3£º×ó²àÆ«Àë£¨×ó°×ÓÒºÚ£©£¬ÓÒ×ª
-        else if (SenL == 1 && SenR == 0) {
-            steer[0] = 'R'; steer[1] = ' ';
-            Motor_SetSpeed(&motor_left, TURN_SPEED);
-            Motor_SetSpeed(&motor_right, 0);
-        }
-        // Çé¿ö4£ºÓÒ²àÆ«Àë£¨×óºÚÓÒ°×£©£¬×ó×ª
-        else if (SenL == 0 && SenR == 1) {
-            steer[0] = 'L'; steer[1] = ' ';
-            Motor_SetSpeed(&motor_left, 0);
-            Motor_SetSpeed(&motor_right, TURN_SPEED);
-        }
-        // Çé¿ö5£ºÖ»ÓĞÖĞ¼ä´«¸ĞÆ÷¼ì²âµ½ºÚÏß£¬´ó×ó×ª
-        else if (SenMid == 0 && SenL == 1 && SenR == 1) {
-            steer[0] = 'L'; steer[1] = 'L';
-            Motor_SetSpeed(&motor_left, 0);
-            Motor_SetSpeed(&motor_right, SHARP_TURN);
-        }
-        // Çé¿ö6£ºÖ»ÓĞ×îÓÒ´«¸ĞÆ÷¼ì²âµ½ºÚÏß£¬´óÓÒ×ª
-        else if (SenRR == 0 && SenL == 1 && SenMid == 1 && SenR == 1) {
-            steer[0] = 'R'; steer[1] = 'R';
-            Motor_SetSpeed(&motor_left, SHARP_TURN);
-            Motor_SetSpeed(&motor_right, 0);
-        }
-        // Çé¿ö7£ºÖ»ÓĞ×î×ó´«¸ĞÆ÷¼ì²âµ½ºÚÏß£¬´ó×ó×ª
-        else if (SenLL == 0 && SenL == 1 && SenMid == 1 && SenR == 1) {
-            steer[0] = 'L'; steer[1] = 'L';
-            Motor_SetSpeed(&motor_left, 0);
-            Motor_SetSpeed(&motor_right, SHARP_TURN);
-        }
-        // Çé¿ö8£ºËùÓĞ´«¸ĞÆ÷¶¼ÊÇ°×É«£¨³å³ö¹ìµÀ£©
-        else if (SenLL == 1 && SenL == 1 && SenMid == 1 && SenR == 1 && SenRR == 1) {
-            steer[0] = 'E'; steer[1] = ' ';
-            
-            // »ùÓÚÀúÊ·Îó²î¾ö¶¨»Ö¸´·½Ïò
-            if (avg_error < 0) { // ÀúÊ·Æ«ÓÒ£¬Ïò×ó×ªÑ°ÕÒºÚÏß
-                Motor_SetSpeed(&motor_left, -200); // ×óÂÖ·´×ª
-                Motor_SetSpeed(&motor_right, 300); // ÓÒÂÖÕı×ª
-            } else { // ÀúÊ·Æ«×ó£¬ÏòÓÒ×ªÑ°ÕÒºÚÏß
-                Motor_SetSpeed(&motor_left, 300);  // ×óÂÖÕı×ª
-                Motor_SetSpeed(&motor_right, -200); // ÓÒÂÖ·´×ª
-            }
-        }
-        // ÆäËûÇé¿ö£º±£ÊØ´¦Àí£¬Ê¹ÓÃÎó²î½øĞĞÎ¢µ÷
-        else {
-            steer[0] = 'C'; steer[1] = ' ';
-            
-            // ±£ÊØËÙ¶È
-            int left_speed = BASE_SPEED - 50;
-            int right_speed = BASE_SPEED - 50;
-            
-            // ¸ù¾İµ±Ç°Îó²îÎ¢µ÷
-            if (fabsf(current_error) > DEAD_ZONE_THRESHOLD) {
-                int adjust = (int)(current_error * 20); // ½ÏĞ¡ÔöÒæ
-                left_speed -= adjust;
-                right_speed += adjust;
-            }
-            
-            // ÏŞ·ù
-            if (left_speed < MIN_SPEED) left_speed = MIN_SPEED;
-            if (right_speed < MIN_SPEED) right_speed = MIN_SPEED;
-            if (left_speed > MAX_SPEED) left_speed = MAX_SPEED;
-            if (right_speed > MAX_SPEED) right_speed = MAX_SPEED;
-            
-            Motor_SetSpeed(&motor_left, left_speed);
-            Motor_SetSpeed(&motor_right, right_speed);
-        }
-        
-        (void)steer;
+    }
+
+    *count = cnt;
+    if (cnt > 0) {
+        *error = (float)sum_pos / (float)cnt;
+    } else {
+        *error = 0.0f;
     }
 }
 
+void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
+{
+    if (htim->Instance != TIM1) return;
+    if (oledProductMode) return;
 
+    OLED_ShowNum(48, 0, runFlag, 1, OLED_8X16);
+
+    if (runFlag == 0) {
+        Motor_SetSpeed(&motor_left, 0);
+        Motor_SetSpeed(&motor_right, 0);
+        integral = 0.0f;
+        last_error = 0.0f;
+        lost_counter = 0;
+        return;
+    }
+
+    /* â€”â€”â€” 1. ä¼ æ„Ÿå™¨è¯¯å·®è®¡ç®— â€”â€”â€” */
+    float error;
+    int black_count;
+    calc_sensor_error(&error, &black_count);
+
+    /* â€”â€”â€” 2. ä¸¢çº¿å¤„ç† â€”â€”â€” */
+    if (black_count == 0) {
+        lost_counter++;
+        if (lost_counter < LOST_LINE_TIMEOUT) {
+            // çŸ­æœŸä¸¢çº¿ï¼šç”¨æœ€åæœ‰æ•ˆè¯¯å·®ï¼Œé™ä½å¢ç›Šç»§ç»­ä¿®æ­£
+            error = saved_error;
+        } else {
+            // é•¿æœŸä¸¢çº¿ï¼šåŸåœ°æ—‹è½¬å¯»çº¿
+            if (saved_error < 0.0f) {
+                // çº¿åœ¨å·¦è¾¹ï¼Œå·¦è½¬å¯»çº¿
+                Motor_SetSpeed(&motor_left, -SEARCH_SPEED);
+                Motor_SetSpeed(&motor_right, SEARCH_SPEED);
+            } else {
+                // çº¿åœ¨å³è¾¹ï¼Œå³è½¬å¯»çº¿
+                Motor_SetSpeed(&motor_left, SEARCH_SPEED);
+                Motor_SetSpeed(&motor_right, -SEARCH_SPEED);
+            }
+            return;
+        }
+    } else if (black_count == 8) {
+        // å…¨éƒ¨æ£€æµ‹åˆ°é»‘çº¿ï¼ˆåå­—è·¯å£/ç²—çº¿ï¼‰ï¼šç›´è¡Œ
+        error = 0.0f;
+        lost_counter = 0;
+    } else {
+        // æ­£å¸¸æ£€æµ‹
+        saved_error = error;
+        lost_counter = 0;
+    }
+
+    /* â€”â€”â€” 3. PID è®¡ç®— â€”â€”â€” */
+    // ç§¯åˆ†ï¼ˆä¸¢çº¿æœŸé—´ä¸ç´¯ç§¯ï¼‰
+    if (lost_counter == 0) {
+        integral += error;
+        integral = clampf(integral, -INTEGRAL_MAX, INTEGRAL_MAX);
+    }
+
+    float derivative = error - last_error;
+    last_error = error;
+
+    float correction = KP * error + KI * integral + KD * derivative;
+    correction = clampf(correction, -MAX_CORRECTION, MAX_CORRECTION);
+
+    /* â€”â€”â€” 4. ç”µæœºè¾“å‡º â€”â€”â€” */
+    int left_speed  = clamp((int)(BASE_SPEED + correction), MIN_SPEED, MAX_SPEED);
+    int right_speed = clamp((int)(BASE_SPEED - correction), MIN_SPEED, MAX_SPEED);
+
+    Motor_SetSpeed(&motor_left, left_speed);
+    Motor_SetSpeed(&motor_right, right_speed);
+
+    /* â€”â€”â€” 5. OLED è°ƒè¯•æ˜¾ç¤º â€”â€”â€” */
+    // ç¬¬4è¡Œæ˜¾ç¤º error*10 å’Œ correction
+    OLED_ShowString(0, 48, "e=", OLED_8X16);
+    OLED_ShowSignedNum(16, 48, (int32_t)(error * 10.0f), 3, OLED_8X16);
+    OLED_ShowString(48, 48, "c=", OLED_8X16);
+    OLED_ShowSignedNum(64, 48, (int32_t)correction, 4, OLED_8X16);
+}
