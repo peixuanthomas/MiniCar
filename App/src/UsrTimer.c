@@ -71,14 +71,14 @@ static inline float clampf(float val, float lo, float hi)
 static void calc_sensor_error(float *error, int *count)
 {
     bool sen[8];
-    sen[0] = !GetSen0Val();  // 0=黑线 → true
-    sen[1] = !GetSen1Val();
-    sen[2] = !GetSen2Val();
-    sen[3] = !GetSen3Val();
-    sen[4] = !GetSen4Val();
-    sen[5] = !GetSen5Val();
-    sen[6] = !GetSen6Val();
-    sen[7] = !GetSen7Val();
+    sen[0] = GetSen0Val();  // GetSenXVal() == 1 means black line detected
+    sen[1] = GetSen1Val();
+    sen[2] = GetSen2Val();
+    sen[3] = GetSen3Val();
+    sen[4] = GetSen4Val();
+    sen[5] = GetSen5Val();
+    sen[6] = GetSen6Val();
+    sen[7] = GetSen7Val();
 
     int sum_pos = 0;
     int cnt = 0;
