@@ -58,3 +58,6 @@ agent.md
 .vscode/
 .eide/
 .cmsis/
+
+# Build output
+build/
