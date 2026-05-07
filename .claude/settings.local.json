@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(gh auth *)",
+      "Bash(git config *)",
+      "Bash(cmd.exe /c \"cmdkey /list\")",
+      "Bash(cmd.exe *)",
+      "Bash(git ls-remote *)",
+      "Bash(git remote *)",
+      "Bash(git push *)"
+    ]
+  }
+}
