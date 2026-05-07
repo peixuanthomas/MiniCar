@@ -22,8 +22,10 @@
 #include "UsrTimer.h"
 #include "stdio.h"
 #include <stdbool.h>
+#include <math.h>
 
 extern volatile uint8_t runFlag;
+extern volatile uint8_t oledProductMode;
 
 // 修正传感器映射（根据你之前的PID代码）
 // 正确的应该是：Sen0=最左，Sen1=左，Sen2=中，Sen3=右，Sen4=最右
@@ -49,11 +51,13 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
     if (htim->Instance == TIM1)  // 检查是TIM1定时器
     {
-        OLED_ShowNum(88, 32, runFlag, 1, OLED_8X16); // 显示运行状态
+        if (oledProductMode) {
+            return;
+        }
+
+        OLED_ShowNum(48, 0, runFlag, 1, OLED_8X16); // 显示运行状态
 
         if (runFlag == 0) { // 未启动，保持停止
-            char blank[3] = {' ', ' ', '\0'};        // 清空方向显示（可变缓冲）
-            OLED_ShowString(88, 16, blank, OLED_8X16);
             Motor_SetSpeed(&motor_left, 0);
             Motor_SetSpeed(&motor_right, 0);
             return;
@@ -239,6 +243,8 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
             Motor_SetSpeed(&motor_right, right_speed);
         }
         
-        OLED_ShowString(88, 16, steer, OLED_8X16);
+        (void)steer;
     }
 }
+
+

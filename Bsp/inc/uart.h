@@ -40,6 +40,7 @@ typedef struct {
 	fifo_t rx_fifo;					// 接收 FIFO
 	uint8_t tx_buf[USART_TRS_LEN];	// 发送缓冲区
 	uint8_t rx_buf[USART_REC_LEN];	// 接收缓冲区
+	uint8_t tx_byte;					// HAL interrupt transmit byte storage
 	volatile bool tx_busy;			// 标志：是否正在发送 DMA/中断传输
 } uart_fifo_handle_t;
 

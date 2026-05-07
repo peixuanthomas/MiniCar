@@ -75,3 +75,157 @@ These source files will be recompiled
 [2026-04-26 11:50:20]	[done]
 	build successfully !
 
+[2026-04-27 12:06:22]	[info] incremental build: 6 source files changed
+These source files will be recompiled
+---
+'c:\Users\STRIX\Desktop\MiniCar\App\src\TaskMain.c': source file has been changed.
+'c:\Users\STRIX\Desktop\MiniCar\App\src\UsrTimer.c': dependence 'c:\Users\STRIX\Desktop\MiniCar\Bsp\inc\adc_bat.h' has been changed.
+'c:\Users\STRIX\Desktop\MiniCar\Bsp\src\Board.c': dependence 'c:\Users\STRIX\Desktop\MiniCar\Bsp\inc\adc_bat.h' has been changed.
+'c:\Users\STRIX\Desktop\MiniCar\Bsp\src\adc_bat.c': source file has been changed.
+'c:\Users\STRIX\Desktop\MiniCar\Core\Src\main.c': dependence 'c:\Users\STRIX\Desktop\MiniCar\Bsp\inc\adc_bat.h' has been changed.
+'c:\Users\STRIX\Desktop\MiniCar\Core\Src\stm32f1xx_it.c': dependence 'c:\Users\STRIX\Desktop\MiniCar\Bsp\inc\adc_bat.h' has been changed.
+
+[2026-04-27 12:06:23]	[done]
+	build successfully !
+
+[2026-04-27 12:08:51]	[info] incremental build: 1 source files changed
+These source files will be recompiled
+---
+'c:\Users\STRIX\Desktop\MiniCar\Core\Src\main.c': source file has been changed.
+
+[2026-04-27 12:08:51]	link failed !, exit code: 1
+   at unify_builder.Program.Main(String[] args_)
+---
+Error: L6218E: Undefined symbol buzzOFF (referred from main.o).
+Error: L6218E: Undefined symbol buzzON (referred from main.o).
+Not enough information to list image symbols.
+Finished: 1 information, 0 warning and 2 error messages.
+
+
+[2026-04-27 12:09:07]	[info] incremental build: 1 source files changed
+These source files will be recompiled
+---
+'c:\Users\STRIX\Desktop\MiniCar\Core\Src\main.c': source file has been changed.
+
+[2026-04-27 12:09:07]	[done]
+	build successfully !
+
+[2026-04-27 12:10:02]	[info] incremental build: 1 source files changed
+These source files will be recompiled
+---
+'c:\Users\STRIX\Desktop\MiniCar\Bsp\src\uart.c': source file has been changed.
+
+[2026-04-27 12:10:02]	[done]
+	build successfully !
+
+[2026-04-27 12:11:42]	[info] incremental build: 6 source files changed
+These source files will be recompiled
+---
+'c:\Users\STRIX\Desktop\MiniCar\App\src\TaskMain.c': dependence 'c:\Users\STRIX\Desktop\MiniCar\Bsp\inc\uart.h' has been changed.
+'c:\Users\STRIX\Desktop\MiniCar\App\src\UsrTimer.c': dependence 'c:\Users\STRIX\Desktop\MiniCar\Bsp\inc\uart.h' has been changed.
+'c:\Users\STRIX\Desktop\MiniCar\Bsp\src\Board.c': dependence 'c:\Users\STRIX\Desktop\MiniCar\Bsp\inc\uart.h' has been changed.
+'c:\Users\STRIX\Desktop\MiniCar\Bsp\src\uart.c': source file has been changed.
+'c:\Users\STRIX\Desktop\MiniCar\Core\Src\main.c': dependence 'c:\Users\STRIX\Desktop\MiniCar\Bsp\inc\uart.h' has been changed.
+'c:\Users\STRIX\Desktop\MiniCar\Core\Src\stm32f1xx_it.c': dependence 'c:\Users\STRIX\Desktop\MiniCar\Bsp\inc\uart.h' has been changed.
+
+[2026-04-27 12:11:43]	[done]
+	build successfully !
+
+[2026-04-27 12:25:56]	[info] incremental build: 1 source files changed
+These source files will be recompiled
+---
+'c:\Users\STRIX\Desktop\MiniCar\Bsp\src\Board.c': source file has been changed.
+
+[2026-04-27 12:25:57]	[done]
+	build successfully !
+
+[2026-04-27 12:26:21]	[done]
+	build successfully !
+
+[2026-04-27 12:35:06]	[info] incremental build: 1 source files changed
+These source files will be recompiled
+---
+'c:\Users\STRIX\Desktop\MiniCar\App\src\TaskMain.c': source file has been changed.
+
+[2026-04-27 12:35:07]	[done]
+	build successfully !
+
+[2026-04-27 12:36:27]	[info] incremental build: 1 source files changed
+These source files will be recompiled
+---
+'c:\Users\STRIX\Desktop\MiniCar\App\src\TaskMain.c': source file has been changed.
+
+[2026-04-27 12:36:27]	[done]
+	build successfully !
+
+[2026-04-27 12:39:36]	[info] incremental build: 1 source files changed
+These source files will be recompiled
+---
+'c:\Users\STRIX\Desktop\MiniCar\App\src\TaskMain.c': source file has been changed.
+
+[2026-04-27 12:39:36]	[done]
+	build successfully !
+
+[2026-04-27 12:48:42]	[info] incremental build: 2 source files changed
+These source files will be recompiled
+---
+'c:\Users\STRIX\Desktop\MiniCar\App\src\TaskMain.c': source file has been changed.
+'c:\Users\STRIX\Desktop\MiniCar\Bsp\src\Board.c': source file has been changed.
+
+[2026-04-27 12:48:42]	[done]
+	build successfully !
+
+[2026-04-27 12:52:41]	[info] incremental build: 4 source files changed
+These source files will be recompiled
+---
+'c:\Users\STRIX\Desktop\MiniCar\App\src\TaskMain.c': source file has been changed.
+'c:\Users\STRIX\Desktop\MiniCar\App\src\UsrTimer.c': source file has been changed.
+'c:\Users\STRIX\Desktop\MiniCar\Bsp\src\Board.c': source file has been changed.
+'c:\Users\STRIX\Desktop\MiniCar\Bsp\src\adc_bat.c': source file has been changed.
+
+[2026-04-27 12:52:41]	[done]
+	build successfully !
+
+[2026-04-27 12:52:57]	[info] incremental build: 4 source files changed
+These source files will be recompiled
+---
+'c:\Users\STRIX\Desktop\MiniCar\App\src\TaskMain.c': source file has been changed.
+'c:\Users\STRIX\Desktop\MiniCar\App\src\UsrTimer.c': source file has been changed.
+'c:\Users\STRIX\Desktop\MiniCar\Bsp\src\Board.c': source file has been changed.
+'c:\Users\STRIX\Desktop\MiniCar\Bsp\src\adc_bat.c': source file has been changed.
+
+[2026-04-27 12:52:58]	[done]
+	build successfully !
+
+[2026-04-27 12:53:56]	[done]
+	build successfully !
+
+[2026-04-27 12:57:26]	[info] incremental build: 1 source files changed
+These source files will be recompiled
+---
+'c:\Users\STRIX\Desktop\MiniCar\App\src\TaskMain.c': source file has been changed.
+
+[2026-04-27 12:57:26]	[done]
+	build successfully !
+
+[2026-04-27 13:04:52]	[info] incremental build: 3 source files changed
+These source files will be recompiled
+---
+'c:\Users\STRIX\Desktop\MiniCar\App\src\TaskMain.c': source file has been changed.
+'c:\Users\STRIX\Desktop\MiniCar\App\src\UsrTimer.c': source file has been changed.
+'c:\Users\STRIX\Desktop\MiniCar\Bsp\src\adc_bat.c': source file has been changed.
+
+[2026-04-27 13:04:53]	[done]
+	build successfully !
+
+[2026-04-27 13:07:02]	[done]
+	build successfully !
+
+[2026-04-27 13:09:17]	[info] incremental build: 1 source files changed
+These source files will be recompiled
+---
+'c:\Users\STRIX\Desktop\MiniCar\App\src\TaskMain.c': source file has been changed.
+
+[2026-04-27 13:09:18]	[done]
+	build successfully !
+

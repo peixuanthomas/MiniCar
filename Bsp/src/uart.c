@@ -64,6 +64,7 @@ void _sys_exit(int x)
   */
 int fputc(int ch, FILE *f)
 {
+	uart_fifo_put(&g_uart1, (uint8_t)ch);
 	uart_fifo_put(&g_uart3, (uint8_t)ch);
 	return ch;
 }
@@ -111,9 +112,8 @@ int uart_fifo_put(uart_fifo_handle_t *handle, uint8_t ch) {
     // 如果当前没有发送正在进行，则启动发送
     if (!handle->tx_busy) {
         handle->tx_busy = true;
-        uint8_t data;
-        if (fifo_read(&handle->tx_fifo, &data) == 0) {
-            HAL_UART_Transmit_IT(handle->huart, &data, 1);
+        if (fifo_read(&handle->tx_fifo, &handle->tx_byte) == 0) {
+            HAL_UART_Transmit_IT(handle->huart, &handle->tx_byte, 1);
         } else {
             handle->tx_busy = false; // 不应发生
         }
@@ -140,9 +140,8 @@ int uart_fifo_puts(uart_fifo_handle_t *handle, const uint8_t *buf, size_t len) {
     // 如果当前没有发送正在进行，则启动发送
     if (!handle->tx_busy) {
         handle->tx_busy = true;
-        uint8_t data;
-        if (fifo_read(&handle->tx_fifo, &data) == 0) {
-            HAL_UART_Transmit_IT(handle->huart, &data, 1);
+        if (fifo_read(&handle->tx_fifo, &handle->tx_byte) == 0) {
+            HAL_UART_Transmit_IT(handle->huart, &handle->tx_byte, 1);
         } else {
             handle->tx_busy = false; // 不应发生
         }
@@ -180,20 +179,18 @@ int uart_fifo_gets(uart_fifo_handle_t *handle, uint8_t *data, size_t len) {
   */
 void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart) {
     if (huart == g_uart1.huart) {
-        uint8_t data;
-        if (fifo_read(&g_uart1.tx_fifo, &data) == 0) {
+        if (fifo_read(&g_uart1.tx_fifo, &g_uart1.tx_byte) == 0) {
             // FIFO 中还有数据，继续发送
-            HAL_UART_Transmit_IT(huart, &data, 1);
+            HAL_UART_Transmit_IT(huart, &g_uart1.tx_byte, 1);
         } else {
             // FIFO 已空，标记发送空闲
             g_uart1.tx_busy = false;
         }
     }
     if (huart == g_uart3.huart) {
-        uint8_t data;
-        if (fifo_read(&g_uart3.tx_fifo, &data) == 0) {
+        if (fifo_read(&g_uart3.tx_fifo, &g_uart3.tx_byte) == 0) {
             // FIFO 中还有数据，继续发送
-            HAL_UART_Transmit_IT(huart, &data, 1);
+            HAL_UART_Transmit_IT(huart, &g_uart3.tx_byte, 1);
         } else {
             // FIFO 已空，标记发送空闲
             g_uart3.tx_busy = false;

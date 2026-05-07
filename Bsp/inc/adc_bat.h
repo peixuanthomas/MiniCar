@@ -28,6 +28,8 @@ extern "C" {
 #include "stm32f1xx_hal.h"
 
 void AdcReadTask(void);
+uint32_t Adc_GetRawValue(void);
+uint16_t Adc_GetMilliVolt(void);
 
 #ifdef __cplusplus
 }

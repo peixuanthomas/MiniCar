@@ -21,6 +21,13 @@
 #include "Board.h"
 //#include "bmp.h"
 
+static void BoardStartupBeep(void)
+{
+	BuzzON();
+	HAL_Delay(100);
+	BuzzOFF();
+}
+
 /** 板级外设初始化函数
   * @brief  被Main函数调用的板级初始化函数
   * @param  None
@@ -28,17 +35,15 @@
   */
 void BoardInit(void)
 {
-	uint32_t i;
+	BoardStartupBeep();
 	InitMwUart1();
 	InitMwUart3();
 	OLED_Init();
-	//OLED_ShowPicture(0,0, 128, 64, BMP1, 1);
-	//OLED_Reverse();
-	for(i=0; i<7; i++)	{
-		OLED_ShowChinese((8+(i<<4)),0,i,16);
-	}
-	OLED_ShowString(8,16, "E-Track Traning", OLED_8X16);
-	OLED_ShowString(72, 48, "mV", OLED_8X16);
+	OLED_ShowString(0, 0, "FLAG:", OLED_8X16);
+	OLED_ShowString(0, 16, "SEN:", OLED_8X16);
+	OLED_ShowString(0, 32, "BAT:", OLED_8X16);
+	OLED_ShowString(72, 32, "mV", OLED_8X16);
 	InitMotor();
 	OLED_Update();
 }
+

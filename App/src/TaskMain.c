@@ -23,6 +23,8 @@
 #include "Board.h"
 
 volatile uint8_t runFlag = 0;   // 0 停止，1 运行
+volatile uint8_t oledProductMode = 0;
+volatile uint8_t key1BuzzSteps = 0;
 
 void Led1Func(void);
 void Led2Func(void);
@@ -34,9 +36,36 @@ void ChkKey0Func(void);
 void ChkKey1Func(void);
 void ChkSenFunc(void);
 
+static void OledShowStatusPage(void)
+{
+	uint8_t SensorVal[8];
+
+	SensorVal[0] = GetSen0Val()? '1':'0';
+	SensorVal[1] = GetSen1Val()? '1':'0';
+	SensorVal[2] = GetSen2Val()? '1':'0';
+	SensorVal[3] = GetSen3Val()? '1':'0';
+	SensorVal[4] = GetSen4Val()? '1':'0';
+	SensorVal[5] = GetSen5Val()? '1':'0';
+	SensorVal[6] = GetSen6Val()? '1':'0';
+	SensorVal[7] = 0;
+
+	OLED_ShowString(0, 0, "FLAG:", OLED_8X16);
+	OLED_ShowString(0, 16, "SEN:", OLED_8X16);
+	OLED_ShowString(0, 32, "BAT:", OLED_8X16);
+	OLED_ShowString(72, 32, "mV", OLED_8X16);
+	OLED_ShowNum(48, 0, runFlag, 1, OLED_8X16);
+	OLED_ShowString(40, 16, (char *)SensorVal, OLED_8X16);
+	OLED_ShowNum(40, 32, Adc_GetMilliVolt(), 4, OLED_8X16);
+}
+
+static void StartBuzzTwice(void)
+{
+	key1BuzzSteps = 4;
+}
+
 TASK_COMPONENTS TaskComps[TASK_MAX] = {
-	{0, 1, 4, ChkKey0Func},			// 右轮控制逻辑，如果需要增加自动控制，这里相应执行逻辑需要去除
-	{0, 1, 4, ChkKey1Func},			// 左轮控制逻辑，如果需要增加自动控制，这里相应执行逻辑需要去除
+	{0, 1, 4, ChkKey0Func},			// 检测Key0的任务，预期每5ms执行一次，在第1ms执行
+	{0, 1, 4, ChkKey1Func},			// 检测Key1的任务，预期每5ms执行一次，在第2ms执行
 	{0, 5, 10, OLED_Update_InPages},	//OLED屏的刷新任务
 	{0, 3, 100, BuzzFunc},
 	{0, 4, 100, Uart1Func},
@@ -87,7 +116,29 @@ void ChkKey0Func(void)
   */
 void ChkKey1Func(void)
 {
-    // 按键1保留为空
+    static uint8_t Cont = 0;
+
+    if (GetKey1Val()) {
+        if (Cont < 5) {
+            Cont++;
+        }
+        if (Cont == 5) {
+            oledProductMode ^= 1;
+            OLED_Clear();
+            if (oledProductMode) {
+                OLED_ShowString(0, 0, "Product of", OLED_8X16);
+                OLED_ShowString(0, 16, "Team Seven", OLED_8X16);
+                //OLED_ShowString(0, 32, "Seven", OLED_8X16);
+            } else {
+                OledShowStatusPage();
+            }
+            OLED_Update();
+            StartBuzzTwice();
+            Cont++;
+        }
+    } else {
+        Cont = 0;
+    }
 }
 
 /** 核心板载LED控制函数
@@ -121,23 +172,17 @@ void Led2Func(void)
   */
 void BuzzFunc(void)
 {
-	// static unsigned char cnt = 0;
-	// cnt ++;	//运行次数计数
-	// switch(cnt)	{
-	// 	case 3:	//第3次打开蜂鸣器
-	// 		BuzzON();
-	// 		break;
-	// 	case 4:	//第4次关闭蜂鸣器
-	// 		BuzzOFF();
-	// 		break;
-	// 	case 40:	//第40次循环，从头开始
-	// 		cnt = 0;
-	// 		break;
-	// 	default:
-	// 		break;
-	// }
+	if (key1BuzzSteps == 0) {
+		BuzzOFF();
+		return;
+	}
 
-  //Leave it empty for now.
+	if ((key1BuzzSteps & 0x01) == 0) {
+		BuzzON();
+	} else {
+		BuzzOFF();
+	}
+	key1BuzzSteps--;
 }
 
 /** UART1检查函数
@@ -178,20 +223,39 @@ void Uart3Func(void)
   */
 void PntFunc(void)
 {
-	static int cnt = 0;
-	printf("In %03d Times\r\n", cnt++);
+	printf("run=%u,sen=%u%u%u%u%u%u%u%u,batt=%u\r\n",
+	       runFlag,
+	       GetSen0Val(),
+	       GetSen1Val(),
+	       GetSen2Val(),
+	       GetSen3Val(),
+	       GetSen4Val(),
+	       GetSen5Val(),
+	       GetSen6Val(),
+	       GetSen7Val(),
+	       Adc_GetMilliVolt());
 }
 
 void ChkSenFunc(void)
 {
-	uint8_t SensorVal[6];
-	SensorVal[0] = GetSen0Val()? 'I':'O';
-	SensorVal[1] = GetSen1Val()? 'I':'O';
-	SensorVal[2] = GetSen2Val()? 'I':'O';
-	SensorVal[3] = GetSen3Val()? 'I':'O';
-	SensorVal[4] = GetSen4Val()? 'I':'O';
-	SensorVal[5] = 0;
-	OLED_ShowString(40, 32, (char *)SensorVal, OLED_8X16);
+	if (oledProductMode) {
+		return;
+	}
+
+	uint8_t SensorVal[8];
+	SensorVal[0] = GetSen0Val()? '1':'0';
+	SensorVal[1] = GetSen1Val()? '1':'0';
+	SensorVal[2] = GetSen2Val()? '1':'0';
+	SensorVal[3] = GetSen3Val()? '1':'0';
+	SensorVal[4] = GetSen4Val()? '1':'0';
+	SensorVal[5] = GetSen5Val()? '1':'0';
+	SensorVal[6] = GetSen6Val()? '1':'0';
+	SensorVal[7] = 0;
+	OLED_ShowString(40, 16, (char *)SensorVal, OLED_8X16);
 	// 这里可以增加定期检测传感器到蓝牙传输，使用printf()函数即可，这里如果打印，则定时器那里仅需打印决策动作
 	// 但这里的是100ms执行一次
 }
+
+
+
+

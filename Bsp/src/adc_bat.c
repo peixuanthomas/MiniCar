@@ -23,6 +23,7 @@
 
 uint8_t Adc_Cplt_Flag = 0;
 uint32_t adc_value;
+static uint16_t adc_milli_volt;
 #define ADCRatio 5.228759765625
 
 void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
@@ -38,14 +39,28 @@ void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
 }
 
 extern ADC_HandleTypeDef hadc1;
+extern volatile uint8_t oledProductMode;
 
 void AdcReadTask(void)
 {
-	uint16_t AdcVal;
 	if(Adc_Cplt_Flag)	{
-		AdcVal = (int)(ADCRatio * adc_value);
-		OLED_ShowNum(40, 48, AdcVal, 4, OLED_8X16);
+		adc_milli_volt = (uint16_t)(ADCRatio * adc_value);
+		if (!oledProductMode) {
+			OLED_ShowNum(40, 32, adc_milli_volt, 4, OLED_8X16);
+		}
 	}
 	HAL_ADC_Start_IT(&hadc1);
 	Adc_Cplt_Flag = 0;
 }
+
+uint32_t Adc_GetRawValue(void)
+{
+	return adc_value;
+}
+
+uint16_t Adc_GetMilliVolt(void)
+{
+	return adc_milli_volt;
+}
+
+
