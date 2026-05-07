@@ -36,18 +36,27 @@ void ChkKey0Func(void);
 void ChkKey1Func(void);
 void ChkSenFunc(void);
 
+#define SENSOR_DISPLAY_COUNT 8
+#define SENSOR_DISPLAY_STR_LEN (SENSOR_DISPLAY_COUNT + 1)
+
+static void ReadSensorDisplayString(uint8_t sensorVal[SENSOR_DISPLAY_STR_LEN])
+{
+	sensorVal[0] = GetSen0Val()? '1':'0';
+	sensorVal[1] = GetSen1Val()? '1':'0';
+	sensorVal[2] = GetSen2Val()? '1':'0';
+	sensorVal[3] = GetSen3Val()? '1':'0';
+	sensorVal[4] = GetSen4Val()? '1':'0';
+	sensorVal[5] = GetSen5Val()? '1':'0';
+	sensorVal[6] = GetSen6Val()? '1':'0';
+	sensorVal[7] = GetSen7Val()? '1':'0';
+	sensorVal[SENSOR_DISPLAY_COUNT] = 0;
+}
+
 static void OledShowStatusPage(void)
 {
-	uint8_t SensorVal[8];
+	uint8_t SensorVal[SENSOR_DISPLAY_STR_LEN];
 
-	SensorVal[0] = GetSen0Val()? '1':'0';
-	SensorVal[1] = GetSen1Val()? '1':'0';
-	SensorVal[2] = GetSen2Val()? '1':'0';
-	SensorVal[3] = GetSen3Val()? '1':'0';
-	SensorVal[4] = GetSen4Val()? '1':'0';
-	SensorVal[5] = GetSen5Val()? '1':'0';
-	SensorVal[6] = GetSen6Val()? '1':'0';
-	SensorVal[7] = 0;
+	ReadSensorDisplayString(SensorVal);
 
 	OLED_ShowString(0, 0, "FLAG:", OLED_8X16);
 	OLED_ShowString(0, 16, "SEN:", OLED_8X16);
@@ -242,15 +251,8 @@ void ChkSenFunc(void)
 		return;
 	}
 
-	uint8_t SensorVal[8];
-	SensorVal[0] = GetSen0Val()? '1':'0';
-	SensorVal[1] = GetSen1Val()? '1':'0';
-	SensorVal[2] = GetSen2Val()? '1':'0';
-	SensorVal[3] = GetSen3Val()? '1':'0';
-	SensorVal[4] = GetSen4Val()? '1':'0';
-	SensorVal[5] = GetSen5Val()? '1':'0';
-	SensorVal[6] = GetSen6Val()? '1':'0';
-	SensorVal[7] = 0;
+	uint8_t SensorVal[SENSOR_DISPLAY_STR_LEN];
+	ReadSensorDisplayString(SensorVal);
 	OLED_ShowString(40, 16, (char *)SensorVal, OLED_8X16);
 	// 这里可以增加定期检测传感器到蓝牙传输，使用printf()函数即可，这里如果打印，则定时器那里仅需打印决策动作
 	// 但这里的是100ms执行一次
