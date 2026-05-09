@@ -235,3 +235,46 @@ These source files will be recompiled
 [2026-05-07 15:51:38]	[done]
 	build successfully !
 
+[2026-05-09 11:51:36]	[done]
+	build successfully !
+
+[2026-05-09 11:52:00]	[info] incremental build: 1 source files changed
+These source files will be recompiled
+---
+'c:\Users\STRIX\Desktop\MiniCar\App\src\UsrTimer.c': source file has been changed.
+
+[2026-05-09 11:52:00]	[done]
+	build successfully !
+
+[2026-05-09 11:55:10]	[info] incremental build: 1 source files changed
+These source files will be recompiled
+---
+'c:\Users\STRIX\Desktop\MiniCar\App\src\UsrTimer.c': source file has been changed.
+
+[2026-05-09 11:55:10]	[done]
+	build successfully !
+
+[2026-05-09 11:56:17]	[info] incremental build: 1 source files changed
+These source files will be recompiled
+---
+'c:\Users\STRIX\Desktop\MiniCar\App\src\UsrTimer.c': source file has been changed.
+
+[2026-05-09 11:56:18]	[done]
+	build successfully !
+
+[2026-05-09 11:58:47]	[info] incremental build: 1 source files changed
+These source files will be recompiled
+---
+'c:\Users\STRIX\Desktop\MiniCar\App\src\UsrTimer.c': source file has been changed.
+
+[2026-05-09 11:58:48]	[done]
+	build successfully !
+
+[2026-05-09 11:59:54]	[info] incremental build: 1 source files changed
+These source files will be recompiled
+---
+'c:\Users\STRIX\Desktop\MiniCar\App\src\UsrTimer.c': source file has been changed.
+
+[2026-05-09 11:59:54]	[done]
+	build successfully !
+

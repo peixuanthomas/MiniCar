@@ -29,6 +29,8 @@ extern volatile uint8_t oledProductMode;
 #define BASE_SPEED        450     // 基础速度 (0-999)
 #define MIN_SPEED         200     // 最低速度
 #define MAX_SPEED         750     // 最高速度
+#define STRAIGHT_TEST_SPEED BASE_SPEED  // Straight-line test speed
+#define SPEED_COMPENSATION 4      // Positive: correct left drift, left wheel + and right wheel -
 
 #define KP                28.0f   // 比例增益
 #define KI                0.3f    // 积分增益
@@ -48,6 +50,7 @@ static float integral     = 0.0f;
 static float last_error   = 0.0f;
 static float saved_error  = 0.0f;   // 丢线时保存的最后有效误差
 static int   lost_counter = 0;
+static volatile bool straight_test_enabled = false; //turn this off to enable PID control
 
 static inline int clamp(int val, int lo, int hi)
 {
@@ -110,6 +113,20 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
         Motor_SetSpeed(&motor_right, 0);
         integral = 0.0f;
         last_error = 0.0f;
+        saved_error = 0.0f;
+        lost_counter = 0;
+        return;
+    }
+
+    if (straight_test_enabled) {
+        /* Straight-line test mode: ignore sensors/PID, keep only wheel trim. */
+        int left_speed  = clamp(STRAIGHT_TEST_SPEED + SPEED_COMPENSATION, MIN_SPEED, MAX_SPEED);
+        int right_speed = clamp(STRAIGHT_TEST_SPEED - SPEED_COMPENSATION, MIN_SPEED, MAX_SPEED);
+        Motor_SetSpeed(&motor_left, left_speed);
+        Motor_SetSpeed(&motor_right, right_speed);
+        integral = 0.0f;
+        last_error = 0.0f;
+        saved_error = 0.0f;
         lost_counter = 0;
         return;
     }
@@ -158,7 +175,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
     float derivative = error - last_error;
     last_error = error;
 
-    float correction = KP * error + KI * integral + KD * derivative;
+    float correction = KP * error + KI * integral + KD * derivative + SPEED_COMPENSATION;
     correction = clampf(correction, -MAX_CORRECTION, MAX_CORRECTION);
 
     /* ——— 4. 电机输出 ——— */
