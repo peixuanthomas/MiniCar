@@ -21,6 +21,7 @@
 #include "main.h"
 #include "TaskMain.h"
 #include "Board.h"
+#include "UsrTimer.h"
 
 volatile uint8_t runFlag = 0;   // 0 停止，1 运行
 volatile uint8_t oledProductMode = 0;
@@ -253,7 +254,12 @@ void ChkSenFunc(void)
 
 	uint8_t SensorVal[SENSOR_DISPLAY_STR_LEN];
 	ReadSensorDisplayString(SensorVal);
+	OLED_ShowNum(48, 0, runFlag, 1, OLED_8X16);
 	OLED_ShowString(40, 16, (char *)SensorVal, OLED_8X16);
+	OLED_ShowString(0, 48, "e=", OLED_8X16);
+	OLED_ShowSignedNum(16, 48, g_line_error_x10, 3, OLED_8X16);
+	OLED_ShowString(48, 48, "c=", OLED_8X16);
+	OLED_ShowSignedNum(64, 48, g_line_correction, 4, OLED_8X16);
 	// 这里可以增加定期检测传感器到蓝牙传输，使用printf()函数即可，这里如果打印，则定时器那里仅需打印决策动作
 	// 但这里的是100ms执行一次
 }

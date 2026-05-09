@@ -123,7 +123,7 @@ void OLED_Update_InPages(void)
 		OLED_WriteData(OLED_DisplayBuf[index], 128);
 		PageNeedFlash &= ~(0x01 << index);
 	}
-	index ++;
+	index = (index + 1) & 0x07;
 }
 
 /*Ó²¼þÅäÖÃ*********************/

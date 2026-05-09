@@ -30,6 +30,12 @@ extern "C" {
 
 #include "board.h"
 
+extern volatile int16_t g_line_error_x10;
+extern volatile int16_t g_line_correction;
+extern volatile int16_t g_line_left_speed;
+extern volatile int16_t g_line_right_speed;
+extern volatile uint8_t g_line_black_count;
+
 #ifdef __cplusplus
 }
 #endif
