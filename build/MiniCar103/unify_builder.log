@@ -278,3 +278,42 @@ These source files will be recompiled
 [2026-05-09 11:59:54]	[done]
 	build successfully !
 
+[2026-05-09 12:48:59]	[info] incremental build: 1 source files changed
+These source files will be recompiled
+---
+'c:\Users\STRIX\Desktop\MiniCar\App\src\UsrTimer.c': source file has been changed.
+
+[2026-05-09 12:48:59]	compilation failed at : "c:\Users\STRIX\Desktop\MiniCar\App\src\UsrTimer.c", exit code: 1
+command: 
+  "C:\Keil_v5\ARM\ARMCC\bin\armcc.exe" -c --apcs=interwork -ICore/Inc -IDrivers/STM32F1xx_HAL_Driver/Inc/Legacy -IDrivers/STM32F1xx_HAL_Driver/Inc -IDrivers/CMSIS/Device/ST/STM32F1xx/Include -IDrivers/CMSIS/Include -IApp/inc -IBsp/inc -IBsp/inc/oled -I.cmsis/include -IMDK-ARM/RTE/_MiniCar103 -D"USE_HAL_DRIVER" -D"STM32F103xB" --cpu Cortex-M3 --li --c99 -D__MICROLIB -O3 --split_sections --no-multibyte-chars -g -o .\build\MiniCar103\.obj\App\src\UsrTimer.o --no_depend_system_headers --depend .\build\MiniCar103\.obj\App\src\UsrTimer.d .\App\src\UsrTimer.c
+   at unify_builder.Program.Main(String[] args_)
+---
+".\App\src\UsrTimer.c", line 178: Error:  #65: expected a ";"
+      float correction = KP * error + KI * integral + KD * derivative + SPEED_COMPENSATION;
+                                      ^
+.\App\src\UsrTimer.c: 0 warnings, 1 error
+
+[2026-05-09 12:49:27]	[info] incremental build: 1 source files changed
+These source files will be recompiled
+---
+'c:\Users\STRIX\Desktop\MiniCar\App\src\UsrTimer.c': source file has been changed.
+
+[2026-05-09 12:49:28]	[done]
+	build successfully !
+
+[2026-05-09 12:51:19]	[info] incremental build: 1 source files changed
+These source files will be recompiled
+---
+'c:\Users\STRIX\Desktop\MiniCar\App\src\UsrTimer.c': source file has been changed.
+
+[2026-05-09 12:51:19]	[done]
+	build successfully !
+
+[2026-05-09 12:53:14]	[info] incremental build: 1 source files changed
+These source files will be recompiled
+---
+'c:\Users\STRIX\Desktop\MiniCar\App\src\UsrTimer.c': source file has been changed.
+
+[2026-05-09 12:53:15]	[done]
+	build successfully !
+

@@ -26,14 +26,14 @@ extern volatile uint8_t runFlag;
 extern volatile uint8_t oledProductMode;
 
 /* ==================== PID 可调参数 ==================== */
-#define BASE_SPEED        450     // 基础速度 (0-999)
-#define MIN_SPEED         200     // 最低速度
-#define MAX_SPEED         750     // 最高速度
+#define BASE_SPEED        400    // 基础速度 (0-999)
+#define MIN_SPEED         300     // 最低速度
+#define MAX_SPEED         600     // 最高速度
 #define STRAIGHT_TEST_SPEED BASE_SPEED  // Straight-line test speed
 #define SPEED_COMPENSATION 4      // Positive: correct left drift, left wheel + and right wheel -
 
 #define KP                28.0f   // 比例增益
-#define KI                0.3f    // 积分增益
+#define KI                0.0f    // 积分增益
 #define KD                65.0f   // 微分增益
 #define INTEGRAL_MAX      40.0f   // 积分限幅 (anti-windup)
 #define MAX_CORRECTION    300     // 输出修正限幅
@@ -43,7 +43,7 @@ extern volatile uint8_t oledProductMode;
 
 /* ==================== 传感器位置权重 ==================== */
 // Sen0(PA7,最右)=+7 ... Sen7(PA0,最左)=-7，按传感器编号索引
-static const int8_t sensor_pos[8] = {7, 5, 3, 1, -1, -3, -5, -7};
+static const int8_t sensor_pos[8] = {-7, -5, -3, -1, 1, 3, 5, 7};
 
 /* ==================== PID 状态变量 ==================== */
 static float integral     = 0.0f;

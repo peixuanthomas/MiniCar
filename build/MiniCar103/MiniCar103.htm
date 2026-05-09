@@ -3,9 +3,9 @@
 <title>Static Call Graph - [.\build\MiniCar103\MiniCar103.axf]</title></head>
 <body><HR>
 <H1>Static Call Graph for image .\build\MiniCar103\MiniCar103.axf</H1><HR>
-<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 5060960: Last Updated: Sat May 09 11:59:54 2026
+<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 5060960: Last Updated: Sat May 09 12:53:15 2026
 <BR><P>
-<H3>Maximum Stack Usage =        176 bytes + Unknown(Cycles, Untraceable Function Pointers)</H3><H3>
+<H3>Maximum Stack Usage =        184 bytes + Unknown(Cycles, Untraceable Function Pointers)</H3><H3>
 Call chain for Maximum Stack Depth:</H3>
 TIM1_UP_IRQHandler &rArr; HAL_TIM_IRQHandler &rArr; HAL_TIM_PeriodElapsedCallback &rArr; OLED_ShowSignedNum &rArr; OLED_ShowChar &rArr; OLED_ShowImage &rArr; OLED_ClearArea
 <P>
@@ -849,7 +849,7 @@ Global Symbols
 </UL>
 
 <P><STRONG><a name="[90]"></a>HAL_TIM_IRQHandler</STRONG> (Thumb, 304 bytes, Stack size 24 bytes, stm32f1xx_hal_tim.o(i.HAL_TIM_IRQHandler))
-<BR><BR>[Stack]<UL><LI>Max Depth = 176<LI>Call Chain = HAL_TIM_IRQHandler &rArr; HAL_TIM_PeriodElapsedCallback &rArr; OLED_ShowSignedNum &rArr; OLED_ShowChar &rArr; OLED_ShowImage &rArr; OLED_ClearArea
+<BR><BR>[Stack]<UL><LI>Max Depth = 184<LI>Call Chain = HAL_TIM_IRQHandler &rArr; HAL_TIM_PeriodElapsedCallback &rArr; OLED_ShowSignedNum &rArr; OLED_ShowChar &rArr; OLED_ShowImage &rArr; OLED_ClearArea
 </UL>
 <BR>[Calls]<UL><LI><a href="#[94]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_TIM_PeriodElapsedCallback
 <LI><a href="#[96]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_TIM_TriggerCallback
@@ -917,8 +917,8 @@ Global Symbols
 <LI><a href="#[c1]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;MX_TIM3_Init
 </UL>
 
-<P><STRONG><a name="[94]"></a>HAL_TIM_PeriodElapsedCallback</STRONG> (Thumb, 440 bytes, Stack size 40 bytes, UsrTimer.o(i.HAL_TIM_PeriodElapsedCallback))
-<BR><BR>[Stack]<UL><LI>Max Depth = 152<LI>Call Chain = HAL_TIM_PeriodElapsedCallback &rArr; OLED_ShowSignedNum &rArr; OLED_ShowChar &rArr; OLED_ShowImage &rArr; OLED_ClearArea
+<P><STRONG><a name="[94]"></a>HAL_TIM_PeriodElapsedCallback</STRONG> (Thumb, 432 bytes, Stack size 48 bytes, UsrTimer.o(i.HAL_TIM_PeriodElapsedCallback))
+<BR><BR>[Stack]<UL><LI>Max Depth = 160<LI>Call Chain = HAL_TIM_PeriodElapsedCallback &rArr; OLED_ShowSignedNum &rArr; OLED_ShowChar &rArr; OLED_ShowImage &rArr; OLED_ClearArea
 </UL>
 <BR>[Calls]<UL><LI><a href="#[4d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_fsub
 <LI><a href="#[a5]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__aeabi_fmul
@@ -1314,7 +1314,7 @@ Global Symbols
 <BR>[Address Reference Count : 1]<UL><LI> startup_stm32f103xb.o(.text)
 </UL>
 <P><STRONG><a name="[2e]"></a>TIM1_UP_IRQHandler</STRONG> (Thumb, 6 bytes, Stack size 0 bytes, stm32f1xx_it.o(i.TIM1_UP_IRQHandler))
-<BR><BR>[Stack]<UL><LI>Max Depth = 176<LI>Call Chain = TIM1_UP_IRQHandler &rArr; HAL_TIM_IRQHandler &rArr; HAL_TIM_PeriodElapsedCallback &rArr; OLED_ShowSignedNum &rArr; OLED_ShowChar &rArr; OLED_ShowImage &rArr; OLED_ClearArea
+<BR><BR>[Stack]<UL><LI>Max Depth = 184<LI>Call Chain = TIM1_UP_IRQHandler &rArr; HAL_TIM_IRQHandler &rArr; HAL_TIM_PeriodElapsedCallback &rArr; OLED_ShowSignedNum &rArr; OLED_ShowChar &rArr; OLED_ShowImage &rArr; OLED_ClearArea
 </UL>
 <BR>[Calls]<UL><LI><a href="#[90]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_TIM_IRQHandler
 </UL>
