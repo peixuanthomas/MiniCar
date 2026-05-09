@@ -9,6 +9,9 @@
 #include "stdio.h"
 #include <stdbool.h>
 
+/* Set true to use simple sensor-state control; set false to use PID control. */
+static bool use_sensor_state_control = true;
+
 extern volatile uint8_t runFlag;
 extern volatile uint8_t oledProductMode;
 
@@ -53,6 +56,15 @@ extern volatile uint8_t oledProductMode;
 #define LOST_LINE_TIMEOUT 30      // 30 * 2ms = 60ms
 #define SEARCH_SPEED      250
 
+#define SENSOR_STATE_BASE_SPEED         380
+#define SENSOR_STATE_MIN_SPEED          180
+#define SENSOR_STATE_MAX_SPEED          560
+#define SENSOR_STATE_FINE_CORRECTION    70
+#define SENSOR_STATE_SMALL_CORRECTION   140
+#define SENSOR_STATE_MEDIUM_CORRECTION  230
+#define SENSOR_STATE_HARD_CORRECTION    320
+#define SENSOR_STATE_SEARCH_SPEED       220
+
 /* Sensor weights indexed by GetSen0Val()..GetSen7Val(). */
 static const int8_t sensor_pos[8] = {-7, -5, -3, -1, 1, 3, 5, 7};
 
@@ -61,6 +73,7 @@ static float integral     = 0.0f;
 static float last_error   = 0.0f;
 static float saved_error  = 0.0f;
 static int   lost_counter = 0;
+static int   last_state_correction = 0;
 static volatile bool straight_test_enabled = false;
 
 volatile int16_t g_line_error_x10 = 0;
@@ -97,9 +110,17 @@ static void reset_line_debug(void)
     publish_line_debug(0.0f, 0.0f, 0, 0, 0);
 }
 
-static void calc_sensor_error(float *error, int *count)
+static void reset_line_control_state(void)
 {
-    bool sen[8];
+    integral = 0.0f;
+    last_error = 0.0f;
+    saved_error = 0.0f;
+    lost_counter = 0;
+    last_state_correction = 0;
+}
+
+static void read_line_sensors(bool sen[8])
+{
     sen[0] = GetSen0Val();  // GetSenXVal() == 1 means black line detected
     sen[1] = GetSen1Val();
     sen[2] = GetSen2Val();
@@ -108,14 +129,32 @@ static void calc_sensor_error(float *error, int *count)
     sen[5] = GetSen5Val();
     sen[6] = GetSen6Val();
     sen[7] = GetSen7Val();
+}
 
-    int sum_pos = 0;
+static int count_line_sensors(const bool sen[8])
+{
     int cnt = 0;
 
     for (int i = 0; i < 8; i++) {
         if (sen[i]) {
-            sum_pos += sensor_pos[i];
             cnt++;
+        }
+    }
+
+    return cnt;
+}
+
+static void calc_sensor_error(float *error, int *count)
+{
+    bool sen[8];
+    read_line_sensors(sen);
+
+    int sum_pos = 0;
+    int cnt = count_line_sensors(sen);
+
+    for (int i = 0; i < 8; i++) {
+        if (sen[i]) {
+            sum_pos += sensor_pos[i];
         }
     }
 
@@ -127,6 +166,93 @@ static void calc_sensor_error(float *error, int *count)
     }
 }
 
+static int calc_sensor_state_correction(const bool sen[8])
+{
+    if (sen[3] && sen[4]) return 0;
+    if (sen[3]) return -SENSOR_STATE_FINE_CORRECTION;
+    if (sen[4]) return SENSOR_STATE_FINE_CORRECTION;
+
+    if (sen[2]) return -SENSOR_STATE_SMALL_CORRECTION;
+    if (sen[5]) return SENSOR_STATE_SMALL_CORRECTION;
+
+    if (sen[1]) return -SENSOR_STATE_MEDIUM_CORRECTION;
+    if (sen[6]) return SENSOR_STATE_MEDIUM_CORRECTION;
+
+    if (sen[0]) return -SENSOR_STATE_HARD_CORRECTION;
+    if (sen[7]) return SENSOR_STATE_HARD_CORRECTION;
+
+    return 0;
+}
+
+static float sensor_state_error_from_correction(int correction)
+{
+    if (correction < 0) {
+        return -1.0f;
+    }
+    if (correction > 0) {
+        return 1.0f;
+    }
+    return 0.0f;
+}
+
+static void apply_sensor_state_speeds(int correction, int black_count)
+{
+    int total_correction = correction + SPEED_COMPENSATION;
+    int left_speed = clamp(SENSOR_STATE_BASE_SPEED + total_correction,
+                           SENSOR_STATE_MIN_SPEED,
+                           SENSOR_STATE_MAX_SPEED);
+    int right_speed = clamp(SENSOR_STATE_BASE_SPEED - total_correction,
+                            SENSOR_STATE_MIN_SPEED,
+                            SENSOR_STATE_MAX_SPEED);
+
+    Motor_SetSpeed(&motor_left, left_speed);
+    Motor_SetSpeed(&motor_right, right_speed);
+    publish_line_debug(sensor_state_error_from_correction(correction),
+                       total_correction,
+                       left_speed,
+                       right_speed,
+                       black_count);
+}
+
+static void run_sensor_state_control(void)
+{
+    bool sen[8];
+    read_line_sensors(sen);
+
+    int black_count = count_line_sensors(sen);
+    int correction = 0;
+
+    if (black_count == 0) {
+        lost_counter++;
+        if (lost_counter < LOST_LINE_TIMEOUT) {
+            correction = last_state_correction;
+            apply_sensor_state_speeds(correction, black_count);
+        } else if (last_state_correction < 0) {
+            Motor_SetSpeed(&motor_left, -SENSOR_STATE_SEARCH_SPEED);
+            Motor_SetSpeed(&motor_right, SENSOR_STATE_SEARCH_SPEED);
+            publish_line_debug(-1.0f,
+                               0.0f,
+                               -SENSOR_STATE_SEARCH_SPEED,
+                               SENSOR_STATE_SEARCH_SPEED,
+                               black_count);
+        } else {
+            Motor_SetSpeed(&motor_left, SENSOR_STATE_SEARCH_SPEED);
+            Motor_SetSpeed(&motor_right, -SENSOR_STATE_SEARCH_SPEED);
+            publish_line_debug(1.0f,
+                               0.0f,
+                               SENSOR_STATE_SEARCH_SPEED,
+                               -SENSOR_STATE_SEARCH_SPEED,
+                               black_count);
+        }
+        return;
+    }
+
+    lost_counter = 0;
+    correction = (black_count == 8) ? 0 : calc_sensor_state_correction(sen);
+    last_state_correction = correction;
+    apply_sensor_state_speeds(correction, black_count);
+}
+
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
     if (htim->Instance != TIM1) return;
@@ -135,11 +261,16 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
     if (runFlag == 0) {
         Motor_SetSpeed(&motor_left, 0);
         Motor_SetSpeed(&motor_right, 0);
+        reset_line_control_state();
+        reset_line_debug();
+        return;
+    }
+
+    if (use_sensor_state_control) {
         integral = 0.0f;
         last_error = 0.0f;
         saved_error = 0.0f;
-        lost_counter = 0;
-        reset_line_debug();
+        run_sensor_state_control();
         return;
     }
 
@@ -148,10 +279,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
         int right_speed = clamp(STRAIGHT_TEST_SPEED - SPEED_COMPENSATION, MIN_SPEED, MAX_SPEED);
         Motor_SetSpeed(&motor_left, left_speed);
         Motor_SetSpeed(&motor_right, right_speed);
-        integral = 0.0f;
-        last_error = 0.0f;
-        saved_error = 0.0f;
-        lost_counter = 0;
+        reset_line_control_state();
         publish_line_debug(0.0f, 0.0f, left_speed, right_speed, 0);
         return;
     }
