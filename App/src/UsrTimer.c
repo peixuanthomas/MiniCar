@@ -57,8 +57,8 @@ extern volatile uint8_t oledProductMode;
 #define SEARCH_SPEED      250
 
 #define SENSOR_STATE_BASE_SPEED         380
-#define SENSOR_STATE_MIN_SPEED          180
-#define SENSOR_STATE_MAX_SPEED          560
+#define SENSOR_STATE_MIN_SPEED          300
+#define SENSOR_STATE_MAX_SPEED          480
 #define SENSOR_STATE_FINE_CORRECTION    70
 #define SENSOR_STATE_SMALL_CORRECTION   140
 #define SENSOR_STATE_MEDIUM_CORRECTION  230
