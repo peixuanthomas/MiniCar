@@ -12,7 +12,32 @@
 extern volatile uint8_t runFlag;
 extern volatile uint8_t oledProductMode;
 
-/* ==================== PID parameters ==================== */
+/* ==================== PID 参数调试说明 ====================
+ * 调参顺序：
+ * 1. 先确认传感器方向和电机修正方向。
+ *    如果小车越修越远，先改 correction 的符号或左右轮输出映射，
+ *    不要先改 KP/KI/KD。
+ * 2. 先设置 KI = 0、KD = 0，低 BASE_SPEED 下只调 KP。
+ * 3. KP 已经能跟线但开始左右摆动后，再逐步加入 KD。
+ * 4. PD 稳定后仍有固定偏差时，最后再加很小的 KI。
+ *
+ * 现象 -> 调整方法：
+ * - 完全没有修正：
+ *   看 OLED 上的 g_line_error_x10。如果一直是 0，先修传感器/误差算法。
+ *   如果误差变化但轮子不变，检查 correction 符号或电机输出。
+ * - 反应太慢、慢慢偏出线：
+ *   适当增大 KP，或者调试阶段先降低 BASE_SPEED。
+ * - 左右大幅蛇形摆动：
+ *   KP 过大，或者 KD 不足。先降低 KP，再逐步增加 KD。
+ * - 高频抖动、轮子一顿一顿：
+ *   KD 过大，或者传感器噪声太强。降低 KD。
+ * - 直线能跟，进弯转不过去：
+ *   降低 BASE_SPEED，降低 MIN_SPEED，或者增大 MAX_CORRECTION。
+ * - PD 稳定后仍长期偏向一侧：
+ *   优先调 SPEED_COMPENSATION。KI 只作为最后的小幅修正。
+ * - 修正时慢侧轮降不下来：
+ *   MIN_SPEED 太高，降低 MIN_SPEED。
+ */
 #define BASE_SPEED        400
 #define MIN_SPEED         300
 #define MAX_SPEED         600

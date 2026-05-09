@@ -325,3 +325,14 @@ These source files will be recompiled
 [2026-05-09 13:05:03]	[done]
 	build successfully !
 
+[2026-05-09 13:28:08]	[info] incremental build: 4 source files changed
+These source files will be recompiled
+---
+'c:\Users\STRIX\Desktop\MiniCar\App\src\TaskMain.c': source file has been changed.
+'c:\Users\STRIX\Desktop\MiniCar\App\src\UsrTimer.c': source file has been changed.
+'c:\Users\STRIX\Desktop\MiniCar\Bsp\src\oled\oled_api.c': source file has been changed.
+'c:\Users\STRIX\Desktop\MiniCar\Core\Src\main.c': source file has been changed.
+
+[2026-05-09 13:28:09]	[done]
+	build successfully !
+
