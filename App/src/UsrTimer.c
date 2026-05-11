@@ -56,15 +56,19 @@ extern volatile uint8_t oledProductMode;
 #define LOST_LINE_TIMEOUT 30      // 30 * 2ms = 60ms
 #define SEARCH_SPEED      250
 
-#define SENSOR_STATE_BASE_SPEED         380
-#define SENSOR_STATE_MIN_SPEED          300
+#define SENSOR_STATE_BASE_SPEED         330
+/* Minimum PWM that can move a wheel; use 0 for stop/pivot instead of low PWM. */
+#define SENSOR_STATE_MIN_SPEED          330
 #define SENSOR_STATE_MAX_SPEED          480
-#define SENSOR_STATE_FINE_CORRECTION    70
-#define SENSOR_STATE_SMALL_CORRECTION   140
-#define SENSOR_STATE_MEDIUM_CORRECTION  230
-#define SENSOR_STATE_HARD_CORRECTION    320
-#define SENSOR_STATE_SEARCH_SPEED       220
-#define SENSOR_STATE_BACKWARD_SPEED     10
+#define SENSOR_STATE_FINE_CORRECTION    50
+#define SENSOR_STATE_SMALL_CORRECTION   120
+#define SENSOR_STATE_MEDIUM_CORRECTION  210
+#define SENSOR_STATE_HARD_CORRECTION    300
+#define SENSOR_STATE_SEARCH_SPEED       330
+/* Backward recovery uses short 330-PWM pulses to avoid continuous fast reverse. */
+#define SENSOR_STATE_BACKWARD_SPEED     330
+#define SENSOR_STATE_BACKWARD_ON_TICKS  2
+#define SENSOR_STATE_BACKWARD_PERIOD_TICKS 10
 #define POOR_TRACKING_TIMEOUT        100  // 100 * 2ms = 200ms
 
 /* Sensor weights indexed by GetSen0Val()..GetSen7Val(). */
@@ -77,6 +81,7 @@ static float saved_error  = 0.0f;
 static int   lost_counter = 0;
 static int   last_state_correction = 0;
 static int   poor_tracking_counter = 0;
+static uint8_t backward_pulse_tick = 0;
 static bool  in_backward_mode = false;
 static volatile bool straight_test_enabled = false;
 
@@ -122,6 +127,7 @@ static void reset_line_control_state(void)
     lost_counter = 0;
     last_state_correction = 0;
     poor_tracking_counter = 0;
+    backward_pulse_tick = 0;
     in_backward_mode = false;
 }
 
@@ -201,22 +207,106 @@ static float sensor_state_error_from_correction(int correction)
     return 0.0f;
 }
 
+static int limit_sensor_state_speed(int speed)
+{
+    if (speed > 0) {
+        return clamp(speed, SENSOR_STATE_MIN_SPEED, SENSOR_STATE_MAX_SPEED);
+    }
+    if (speed < 0) {
+        return -clamp(-speed, SENSOR_STATE_MIN_SPEED, SENSOR_STATE_MAX_SPEED);
+    }
+    return 0;
+}
+
+static void calc_sensor_state_speeds(int correction, int *left_speed, int *right_speed)
+{
+    int magnitude = (correction < 0) ? -correction : correction;
+    int inner_speed;
+    int outer_speed;
+
+    if (magnitude == 0) {
+        *left_speed = SENSOR_STATE_BASE_SPEED + SPEED_COMPENSATION;
+        *right_speed = SENSOR_STATE_BASE_SPEED - SPEED_COMPENSATION;
+    } else if (magnitude <= SENSOR_STATE_FINE_CORRECTION) {
+        inner_speed = SENSOR_STATE_MIN_SPEED;
+        outer_speed = SENSOR_STATE_BASE_SPEED + SENSOR_STATE_FINE_CORRECTION;
+        if (correction < 0) {
+            *left_speed = inner_speed;
+            *right_speed = outer_speed;
+        } else {
+            *left_speed = outer_speed;
+            *right_speed = inner_speed;
+        }
+    } else if (magnitude <= SENSOR_STATE_SMALL_CORRECTION) {
+        inner_speed = 0;
+        outer_speed = SENSOR_STATE_BASE_SPEED + SENSOR_STATE_FINE_CORRECTION;
+        if (correction < 0) {
+            *left_speed = inner_speed;
+            *right_speed = outer_speed;
+        } else {
+            *left_speed = outer_speed;
+            *right_speed = inner_speed;
+        }
+    } else if (magnitude <= SENSOR_STATE_MEDIUM_CORRECTION) {
+        inner_speed = 0;
+        outer_speed = SENSOR_STATE_BASE_SPEED + SENSOR_STATE_SMALL_CORRECTION;
+        if (correction < 0) {
+            *left_speed = inner_speed;
+            *right_speed = outer_speed;
+        } else {
+            *left_speed = outer_speed;
+            *right_speed = inner_speed;
+        }
+    } else {
+        inner_speed = -SENSOR_STATE_MIN_SPEED;
+        outer_speed = SENSOR_STATE_MIN_SPEED;
+        if (correction < 0) {
+            *left_speed = inner_speed;
+            *right_speed = outer_speed;
+        } else {
+            *left_speed = outer_speed;
+            *right_speed = inner_speed;
+        }
+    }
+
+    *left_speed = limit_sensor_state_speed(*left_speed);
+    *right_speed = limit_sensor_state_speed(*right_speed);
+}
+
 static void apply_sensor_state_speeds(int correction, int black_count)
 {
-    int total_correction = correction + SPEED_COMPENSATION;
-    int left_speed = clamp(SENSOR_STATE_BASE_SPEED + total_correction,
-                           SENSOR_STATE_MIN_SPEED,
-                           SENSOR_STATE_MAX_SPEED);
-    int right_speed = clamp(SENSOR_STATE_BASE_SPEED - total_correction,
-                            SENSOR_STATE_MIN_SPEED,
-                            SENSOR_STATE_MAX_SPEED);
+    int left_speed;
+    int right_speed;
+
+    calc_sensor_state_speeds(correction, &left_speed, &right_speed);
 
     Motor_SetSpeed(&motor_left, left_speed);
     Motor_SetSpeed(&motor_right, right_speed);
     publish_line_debug(sensor_state_error_from_correction(correction),
-                       total_correction,
+                       correction,
                        left_speed,
                        right_speed,
+                       black_count);
+}
+
+static void apply_sensor_state_backward(int black_count)
+{
+    int backward_speed = 0;
+
+    if (backward_pulse_tick < SENSOR_STATE_BACKWARD_ON_TICKS) {
+        backward_speed = -SENSOR_STATE_BACKWARD_SPEED;
+    }
+
+    backward_pulse_tick++;
+    if (backward_pulse_tick >= SENSOR_STATE_BACKWARD_PERIOD_TICKS) {
+        backward_pulse_tick = 0;
+    }
+
+    Motor_SetSpeed(&motor_left, backward_speed);
+    Motor_SetSpeed(&motor_right, backward_speed);
+    publish_line_debug(0.0f, 0.0f,
+                       backward_speed,
+                       backward_speed,
                        black_count);
 }
 
@@ -234,16 +324,12 @@ static void run_sensor_state_control(void)
             in_backward_mode = false;
             poor_tracking_counter = 0;
             lost_counter = 0;
+            backward_pulse_tick = 0;
             correction = (black_count == 8) ? 0 : calc_sensor_state_correction(sen);
             last_state_correction = correction;
             apply_sensor_state_speeds(correction, black_count);
         } else {
-            Motor_SetSpeed(&motor_left, -SENSOR_STATE_BACKWARD_SPEED);
-            Motor_SetSpeed(&motor_right, -SENSOR_STATE_BACKWARD_SPEED);
-            publish_line_debug(0.0f, 0.0f,
-                               -SENSOR_STATE_BACKWARD_SPEED,
-                               -SENSOR_STATE_BACKWARD_SPEED,
-                               black_count);
+            apply_sensor_state_backward(black_count);
         }
         return;
     }
@@ -251,12 +337,8 @@ static void run_sensor_state_control(void)
     // All sensors lost: enter backward mode immediately
     if (black_count == 0) {
         in_backward_mode = true;
-        Motor_SetSpeed(&motor_left, -SENSOR_STATE_BACKWARD_SPEED);
-        Motor_SetSpeed(&motor_right, -SENSOR_STATE_BACKWARD_SPEED);
-        publish_line_debug(0.0f, 0.0f,
-                           -SENSOR_STATE_BACKWARD_SPEED,
-                           -SENSOR_STATE_BACKWARD_SPEED,
-                           black_count);
+        backward_pulse_tick = 0;
+        apply_sensor_state_backward(black_count);
         return;
     }
 
@@ -268,12 +350,8 @@ static void run_sensor_state_control(void)
         poor_tracking_counter++;
         if (poor_tracking_counter > POOR_TRACKING_TIMEOUT) {
             in_backward_mode = true;
-            Motor_SetSpeed(&motor_left, -SENSOR_STATE_BACKWARD_SPEED);
-            Motor_SetSpeed(&motor_right, -SENSOR_STATE_BACKWARD_SPEED);
-            publish_line_debug(0.0f, 0.0f,
-                               -SENSOR_STATE_BACKWARD_SPEED,
-                               -SENSOR_STATE_BACKWARD_SPEED,
-                               black_count);
+            backward_pulse_tick = 0;
+            apply_sensor_state_backward(black_count);
             return;
         }
     } else {
