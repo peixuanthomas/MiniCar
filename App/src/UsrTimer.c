@@ -49,7 +49,7 @@ extern volatile uint8_t oledProductMode;
 
 #define KP                2.0f
 #define KI                0.0f
-#define KD                0.7f
+#define KD                1.2f
 #define INTEGRAL_MAX      40.0f
 #define MAX_CORRECTION    300
 
