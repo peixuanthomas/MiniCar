@@ -1,7 +1,13 @@
 >>> cc
 
-
+".\App\src\UsrTimer.c", line 76: Warning:  #550-D: variable "saved_error"  was set but never used
+  static float saved_error  = 0.0f;
+               ^
+".\App\src\UsrTimer.c", line 78: Warning:  #550-D: variable "last_state_correction"  was set but never used
+  static int   last_state_correction = 0;
+               ^
+.\App\src\UsrTimer.c: 2 warnings, 0 errors
 
 >>> ld
 
-Program Size: Code=18012 RO-data=3344 RW-data=848 ZI-data=2456  
+Program Size: Code=18048 RO-data=3344 RW-data=852 ZI-data=2460  

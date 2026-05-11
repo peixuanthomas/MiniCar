@@ -47,9 +47,9 @@ extern volatile uint8_t oledProductMode;
 #define STRAIGHT_TEST_SPEED BASE_SPEED
 #define SPEED_COMPENSATION 4      // Positive: correct left drift, left wheel + and right wheel -
 
-#define KP                15.0f
+#define KP                2.0f
 #define KI                0.0f
-#define KD                65.0f
+#define KD                0.7f
 #define INTEGRAL_MAX      40.0f
 #define MAX_CORRECTION    300
 
@@ -64,6 +64,8 @@ extern volatile uint8_t oledProductMode;
 #define SENSOR_STATE_MEDIUM_CORRECTION  230
 #define SENSOR_STATE_HARD_CORRECTION    320
 #define SENSOR_STATE_SEARCH_SPEED       220
+#define SENSOR_STATE_BACKWARD_SPEED     1
+#define POOR_TRACKING_TIMEOUT        100  // 100 * 2ms = 200ms
 
 /* Sensor weights indexed by GetSen0Val()..GetSen7Val(). */
 static const int8_t sensor_pos[8] = {-7, -5, -3, -1, 1, 3, 5, 7};
@@ -74,6 +76,8 @@ static float last_error   = 0.0f;
 static float saved_error  = 0.0f;
 static int   lost_counter = 0;
 static int   last_state_correction = 0;
+static int   poor_tracking_counter = 0;
+static bool  in_backward_mode = false;
 static volatile bool straight_test_enabled = false;
 
 volatile int16_t g_line_error_x10 = 0;
@@ -117,6 +121,8 @@ static void reset_line_control_state(void)
     saved_error = 0.0f;
     lost_counter = 0;
     last_state_correction = 0;
+    poor_tracking_counter = 0;
+    in_backward_mode = false;
 }
 
 static void read_line_sensors(bool sen[8])
@@ -222,29 +228,56 @@ static void run_sensor_state_control(void)
     int black_count = count_line_sensors(sen);
     int correction = 0;
 
-    if (black_count == 0) {
-        lost_counter++;
-        if (lost_counter < LOST_LINE_TIMEOUT) {
-            correction = last_state_correction;
+    // In backward mode: stay backward until line is clearly re-acquired
+    if (in_backward_mode) {
+        if (black_count >= 2 || sen[3] || sen[4]) {
+            in_backward_mode = false;
+            poor_tracking_counter = 0;
+            lost_counter = 0;
+            correction = (black_count == 8) ? 0 : calc_sensor_state_correction(sen);
+            last_state_correction = correction;
             apply_sensor_state_speeds(correction, black_count);
-        } else if (last_state_correction < 0) {
-            Motor_SetSpeed(&motor_left, -SENSOR_STATE_SEARCH_SPEED);
-            Motor_SetSpeed(&motor_right, SENSOR_STATE_SEARCH_SPEED);
-            publish_line_debug(-1.0f,
-                               0.0f,
-                               -SENSOR_STATE_SEARCH_SPEED,
-                               SENSOR_STATE_SEARCH_SPEED,
-                               black_count);
         } else {
-            Motor_SetSpeed(&motor_left, SENSOR_STATE_SEARCH_SPEED);
-            Motor_SetSpeed(&motor_right, -SENSOR_STATE_SEARCH_SPEED);
-            publish_line_debug(1.0f,
-                               0.0f,
-                               SENSOR_STATE_SEARCH_SPEED,
-                               -SENSOR_STATE_SEARCH_SPEED,
+            Motor_SetSpeed(&motor_left, -SENSOR_STATE_BACKWARD_SPEED);
+            Motor_SetSpeed(&motor_right, -SENSOR_STATE_BACKWARD_SPEED);
+            publish_line_debug(0.0f, 0.0f,
+                               -SENSOR_STATE_BACKWARD_SPEED,
+                               -SENSOR_STATE_BACKWARD_SPEED,
                                black_count);
         }
         return;
+    }
+
+    // All sensors lost: enter backward mode immediately
+    if (black_count == 0) {
+        in_backward_mode = true;
+        Motor_SetSpeed(&motor_left, -SENSOR_STATE_BACKWARD_SPEED);
+        Motor_SetSpeed(&motor_right, -SENSOR_STATE_BACKWARD_SPEED);
+        publish_line_debug(0.0f, 0.0f,
+                           -SENSOR_STATE_BACKWARD_SPEED,
+                           -SENSOR_STATE_BACKWARD_SPEED,
+                           black_count);
+        return;
+    }
+
+    // Detect poor tracking: only extreme edge sensors, barely on the line
+    bool has_center = sen[3] || sen[4];
+    bool has_near = sen[2] || sen[5];
+
+    if (!has_center && !has_near && black_count <= 1) {
+        poor_tracking_counter++;
+        if (poor_tracking_counter > POOR_TRACKING_TIMEOUT) {
+            in_backward_mode = true;
+            Motor_SetSpeed(&motor_left, -SENSOR_STATE_BACKWARD_SPEED);
+            Motor_SetSpeed(&motor_right, -SENSOR_STATE_BACKWARD_SPEED);
+            publish_line_debug(0.0f, 0.0f,
+                               -SENSOR_STATE_BACKWARD_SPEED,
+                               -SENSOR_STATE_BACKWARD_SPEED,
+                               black_count);
+            return;
+        }
+    } else {
+        poor_tracking_counter = 0;
     }
 
     lost_counter = 0;
@@ -252,7 +285,6 @@ static void run_sensor_state_control(void)
     last_state_correction = correction;
     apply_sensor_state_speeds(correction, black_count);
 }
-
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
     if (htim->Instance != TIM1) return;
@@ -289,21 +321,10 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
     calc_sensor_error(&error, &black_count);
 
     if (black_count == 0) {
-        lost_counter++;
-        if (lost_counter < LOST_LINE_TIMEOUT) {
-            error = saved_error;
-        } else {
-            if (saved_error < 0.0f) {
-                Motor_SetSpeed(&motor_left, -SEARCH_SPEED);
-                Motor_SetSpeed(&motor_right, SEARCH_SPEED);
-                publish_line_debug(saved_error, 0.0f, -SEARCH_SPEED, SEARCH_SPEED, black_count);
-            } else {
-                Motor_SetSpeed(&motor_left, SEARCH_SPEED);
-                Motor_SetSpeed(&motor_right, -SEARCH_SPEED);
-                publish_line_debug(saved_error, 0.0f, SEARCH_SPEED, -SEARCH_SPEED, black_count);
-            }
-            return;
-        }
+        Motor_SetSpeed(&motor_left, -SEARCH_SPEED);
+        Motor_SetSpeed(&motor_right, -SEARCH_SPEED);
+        publish_line_debug(0.0f, 0.0f, -SEARCH_SPEED, -SEARCH_SPEED, black_count);
+        return;
     } else if (black_count == 8) {
         error = 0.0f;
         lost_counter = 0;

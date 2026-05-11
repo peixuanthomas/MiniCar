@@ -1,4 +1,4 @@
---cpu Cortex-M3 --library_type=microlib --scatter c:/Users/STRIX/Desktop/MiniCar/build/MiniCar103/MiniCar103.sct --strict --summary_stderr --info summarysizes --map --xref --callgraph --symbols --info sizes --info totals --info unused --info veneers
+--cpu Cortex-M3 --library_type=microlib --scatter d:/gitgitgit(magicbook)/MiniCar/build/MiniCar103/MiniCar103.sct --strict --summary_stderr --info summarysizes --map --xref --callgraph --symbols --info sizes --info totals --info unused --info veneers
 --list .\build\MiniCar103\MiniCar103.map
 .\build\MiniCar103\.obj\App\src\TaskMain.o
 .\build\MiniCar103\.obj\App\src\UsrTimer.o

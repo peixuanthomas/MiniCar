@@ -43,6 +43,7 @@ CompileFlags:
     - -D"__OPT_SMALL_ASSERT=1"
     - -D"__OPTIMISE_LEVEL=2"
     - -D"__SOFTFP__=1"
+    - -D"__ARMCC_VERSION=5060750"
   Remove: []
   CompilationDatabase: ./build/MiniCar103
 Diagnostics:

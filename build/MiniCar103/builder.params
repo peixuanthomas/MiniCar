@@ -3,11 +3,11 @@
     "target": "MiniCar103",
     "toolchain": "AC5",
     "toolchainLocation": "C:\\Keil_v5\\ARM\\ARMCC",
-    "toolchainCfgFile": "c:\\Users\\STRIX\\.vscode\\extensions\\cl.eide-3.26.9\\res\\data\\models/arm.v5.model.json",
+    "toolchainCfgFile": "c:\\Users\\wjnwj\\.vscode\\extensions\\cl.eide-3.26.9\\res\\data\\models/arm.v5.model.json",
     "buildMode": "fast|multhread",
     "showRepathOnLog": true,
-    "threadNum": 24,
-    "rootDir": "c:\\Users\\STRIX\\Desktop\\MiniCar",
+    "threadNum": 16,
+    "rootDir": "d:\\gitgitgit(magicbook)\\MiniCar",
     "dumpPath": "build\\MiniCar103",
     "outDir": "build\\MiniCar103",
     "ram": 20480,
@@ -66,7 +66,9 @@
     "options": {
         "version": 4,
         "afterBuildTasks": [],
-        "asm-compiler": {},
+        "asm-compiler": {
+            "defines": []
+        },
         "beforeBuildTasks": [],
         "c/cpp-compiler": {
             "CXX_FLAGS": "--no-multibyte-chars",
@@ -95,21 +97,21 @@
             "rw-base": "",
             "xo-base": "",
             "link-scatter": [
-                "c:/Users/STRIX/Desktop/MiniCar/build/MiniCar103/MiniCar103.sct"
+                "d:/gitgitgit(magicbook)/MiniCar/build/MiniCar103/MiniCar103.sct"
             ]
         }
     },
     "env": {
         "KEIL_OUTPUT_DIR": "MiniCar103",
-        "workspaceFolder": "c:\\Users\\STRIX\\Desktop\\MiniCar",
+        "workspaceFolder": "d:\\gitgitgit(magicbook)\\MiniCar",
         "workspaceFolderBasename": "MiniCar",
-        "OutDir": "c:\\Users\\STRIX\\Desktop\\MiniCar\\build\\MiniCar103",
+        "OutDir": "d:\\gitgitgit(magicbook)\\MiniCar\\build\\MiniCar103",
         "OutDirRoot": "build",
         "OutDirBase": "build\\MiniCar103",
         "ProjectName": "MiniCar103",
         "ConfigName": "MiniCar103",
-        "ProjectRoot": "c:\\Users\\STRIX\\Desktop\\MiniCar",
-        "ExecutableName": "c:\\Users\\STRIX\\Desktop\\MiniCar\\build\\MiniCar103\\MiniCar103",
+        "ProjectRoot": "d:\\gitgitgit(magicbook)\\MiniCar",
+        "ExecutableName": "d:\\gitgitgit(magicbook)\\MiniCar\\build\\MiniCar103\\MiniCar103",
         "ChipPackDir": "",
         "ChipName": "",
         "SYS_Platform": "win32",
@@ -118,10 +120,10 @@
         "SYS_PathSep": ";",
         "SYS_PathSeparator": ";",
         "SYS_EOL": "\r\n",
-        "EIDE_BUILDER_DIR": "c:\\Users\\STRIX\\.vscode\\extensions\\cl.eide-3.26.9\\res\\tools\\win32\\unify_builder",
+        "EIDE_BUILDER_DIR": "c:\\Users\\wjnwj\\.vscode\\extensions\\cl.eide-3.26.9\\res\\tools\\win32\\unify_builder",
         "EIDE_BINARIES_VER": "12.1.1",
-        "EIDE_MSYS": "C:\\Users\\STRIX\\.eide\\bin\\builder\\msys\\bin",
-        "EIDE_PY3_CMD": "C:\\Users\\STRIX\\.eide\\bin\\python36\\python3.exe",
+        "EIDE_MSYS": "C:\\Users\\wjnwj\\.eide\\bin\\builder\\msys\\bin",
+        "EIDE_PY3_CMD": "C:\\Users\\wjnwj\\.eide\\bin\\python36\\python3.exe",
         "ToolchainRoot": "C:\\Keil_v5\\ARM\\ARMCC"
     },
     "sysPaths": []
