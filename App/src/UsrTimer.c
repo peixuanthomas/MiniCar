@@ -64,7 +64,7 @@ extern volatile uint8_t oledProductMode;
 #define SENSOR_STATE_MEDIUM_CORRECTION  230
 #define SENSOR_STATE_HARD_CORRECTION    320
 #define SENSOR_STATE_SEARCH_SPEED       220
-#define SENSOR_STATE_BACKWARD_SPEED     1
+#define SENSOR_STATE_BACKWARD_SPEED     10
 #define POOR_TRACKING_TIMEOUT        100  // 100 * 2ms = 200ms
 
 /* Sensor weights indexed by GetSen0Val()..GetSen7Val(). */
