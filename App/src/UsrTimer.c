@@ -10,7 +10,7 @@
 #include <stdbool.h>
 
 /* Set true to use simple sensor-state control; set false to use PID control. */
-static bool use_sensor_state_control = true;
+static bool use_sensor_state_control = false;
 
 extern volatile uint8_t runFlag;
 extern volatile uint8_t oledProductMode;
@@ -42,16 +42,31 @@ extern volatile uint8_t oledProductMode;
  *   MIN_SPEED 太高，降低 MIN_SPEED。
  */
 #define BASE_SPEED        400
-#define MIN_SPEED         300
+#define MIN_SPEED         200     /* 降低使转向时内侧轮减速更多 */
 #define MAX_SPEED         600
 #define STRAIGHT_TEST_SPEED BASE_SPEED
-#define SPEED_COMPENSATION 4      // Positive: correct left drift, left wheel + and right wheel -
 
-#define KP                2.0f
-#define KI                0.0f
-#define KD                1.2f
-#define INTEGRAL_MAX      40.0f
-#define MAX_CORRECTION    300
+/* 左右轮独立漂移补偿 (正值=该轮加速) */
+#define LEFT_DRIFT_COMP   4
+#define RIGHT_DRIFT_COMP  0
+
+/* 原 SPEED_COMPENSATION 用于 sensor_state 和直行测试模式 */
+#define SPEED_COMPENSATION 4
+
+#define KP                2.4f
+#define KI                0.04f    /* 微量积分消除稳态偏差 */
+#define KD                1.6f
+#define INTEGRAL_MAX      30.0f    /* 积分限幅 */
+#define MAX_CORRECTION    350      /* 增大最大修正量 */
+
+/* 微分低通滤波系数: 0=不滤波, 1=完全滤波 */
+#define DERIVATIVE_LPF_ALPHA  0.3f
+
+/* 条件积分阈值: |error| 小于此值时积分 */
+#define INTEGRATE_THRESHOLD 3.0f
+
+/* 最大加速度: 每 2ms tick 速度最大变化量 */
+#define MAX_ACCEL_DELTA   30
 
 #define LOST_LINE_TIMEOUT 30      // 30 * 2ms = 60ms
 #define SEARCH_SPEED      250
@@ -75,14 +90,20 @@ extern volatile uint8_t oledProductMode;
 static const int8_t sensor_pos[8] = {-7, -5, -3, -1, 1, 3, 5, 7};
 
 /* ==================== PID state ==================== */
-static float integral     = 0.0f;
-static float last_error   = 0.0f;
-static float saved_error  = 0.0f;
-static int   lost_counter = 0;
+static float integral              = 0.0f;
+static float last_error            = 0.0f;
+static float filtered_derivative   = 0.0f;
+static float saved_error           = 0.0f;
+static int   lost_counter          = 0;
+static int   prev_left_speed       = 0;
+static int   prev_right_speed      = 0;
+
+/* ==================== Sensor state machine state ==================== */
 static int   last_state_correction = 0;
 static int   poor_tracking_counter = 0;
 static uint8_t backward_pulse_tick = 0;
 static bool  in_backward_mode = false;
+
 static volatile bool straight_test_enabled = false;
 
 volatile int16_t g_line_error_x10 = 0;
@@ -123,8 +144,12 @@ static void reset_line_control_state(void)
 {
     integral = 0.0f;
     last_error = 0.0f;
+    filtered_derivative = 0.0f;
     saved_error = 0.0f;
     lost_counter = 0;
+    prev_left_speed = 0;
+    prev_right_speed = 0;
+
     last_state_correction = 0;
     poor_tracking_counter = 0;
     backward_pulse_tick = 0;
@@ -398,32 +423,65 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
     int black_count;
     calc_sensor_error(&error, &black_count);
 
+    /* ---- 丢线处理: 先直线后退, 再原地旋转寻线 ---- */
     if (black_count == 0) {
-        Motor_SetSpeed(&motor_left, -SEARCH_SPEED);
-        Motor_SetSpeed(&motor_right, -SEARCH_SPEED);
-        publish_line_debug(0.0f, 0.0f, -SEARCH_SPEED, -SEARCH_SPEED, black_count);
+        lost_counter++;
+        int l, r;
+        if (lost_counter <= LOST_LINE_TIMEOUT) {
+            /* 阶段1: 直线后退 */
+            l = r = -SEARCH_SPEED;
+        } else if (saved_error < 0) {
+            /* 阶段2: 最后看到线在左边 -> 左转寻线 */
+            l = -SEARCH_SPEED; r = SEARCH_SPEED;
+        } else {
+            /* 阶段2: 最后看到线在右边或未知 -> 右转寻线 */
+            l = SEARCH_SPEED; r = -SEARCH_SPEED;
+        }
+        Motor_SetSpeed(&motor_left, l);
+        Motor_SetSpeed(&motor_right, r);
+        prev_left_speed = 0;    /* 清除加速限幅状态, 以便重新平稳起步 */
+        prev_right_speed = 0;
+        publish_line_debug(0.0f, 0.0f, l, r, black_count);
         return;
-    } else if (black_count == 8) {
+    }
+
+    lost_counter = 0;
+
+    if (black_count == 8) {
         error = 0.0f;
-        lost_counter = 0;
     } else {
         saved_error = error;
-        lost_counter = 0;
     }
 
-    if (lost_counter == 0) {
+    /* ---- 条件积分: 小误差时积分, 大误差时缓慢衰减 ---- */
+    if (error > -INTEGRATE_THRESHOLD && error < INTEGRATE_THRESHOLD) {
         integral += error;
-        integral = clampf(integral, -INTEGRAL_MAX, INTEGRAL_MAX);
+    } else {
+        integral *= 0.95f;    /* 防弯道积分饱和 */
     }
+    integral = clampf(integral, -INTEGRAL_MAX, INTEGRAL_MAX);
 
-    float derivative = error - last_error;
+    /* ---- 微分 + 低通滤波 ---- */
+    float raw_derivative = error - last_error;
     last_error = error;
+    filtered_derivative = DERIVATIVE_LPF_ALPHA * filtered_derivative
+                        + (1.0f - DERIVATIVE_LPF_ALPHA) * raw_derivative;
 
-    float correction = KP * error + KI * integral + KD * derivative + SPEED_COMPENSATION;
+    /* ---- PID 输出 ---- */
+    float correction = KP * error + KI * integral + KD * filtered_derivative;
     correction = clampf(correction, -MAX_CORRECTION, MAX_CORRECTION);
 
-    int left_speed  = clamp((int)(BASE_SPEED + correction), MIN_SPEED, MAX_SPEED);
-    int right_speed = clamp((int)(BASE_SPEED - correction), MIN_SPEED, MAX_SPEED);
+    /* ---- 速度映射 + 左右轮独立补偿 ---- */
+    int left_speed  = clamp((int)(BASE_SPEED + correction + LEFT_DRIFT_COMP), MIN_SPEED, MAX_SPEED);
+    int right_speed = clamp((int)(BASE_SPEED - correction + RIGHT_DRIFT_COMP), MIN_SPEED, MAX_SPEED);
+
+    /* ---- 加速度限幅 (平滑过渡, 避免电机急跳) ---- */
+    if (prev_left_speed != 0 || prev_right_speed != 0) {
+        left_speed  = clamp(left_speed,  prev_left_speed - MAX_ACCEL_DELTA,  prev_left_speed + MAX_ACCEL_DELTA);
+        right_speed = clamp(right_speed, prev_right_speed - MAX_ACCEL_DELTA, prev_right_speed + MAX_ACCEL_DELTA);
+    }
+    prev_left_speed  = left_speed;
+    prev_right_speed = right_speed;
 
     Motor_SetSpeed(&motor_left, left_speed);
     Motor_SetSpeed(&motor_right, right_speed);
