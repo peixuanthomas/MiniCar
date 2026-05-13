@@ -58,15 +58,15 @@ extern volatile uint8_t oledProductMode;
 
 #define SENSOR_STATE_BASE_SPEED         330
 /* Minimum PWM that can move a wheel; use 0 for stop/pivot instead of low PWM. */
-#define SENSOR_STATE_MIN_SPEED          330
-#define SENSOR_STATE_MAX_SPEED          480
-#define SENSOR_STATE_FINE_CORRECTION    50
+#define SENSOR_STATE_MIN_SPEED          400
+#define SENSOR_STATE_MAX_SPEED          600
+#define SENSOR_STATE_FINE_CORRECTION    90
 #define SENSOR_STATE_SMALL_CORRECTION   120
 #define SENSOR_STATE_MEDIUM_CORRECTION  210
-#define SENSOR_STATE_HARD_CORRECTION    300
-#define SENSOR_STATE_SEARCH_SPEED       330
+#define SENSOR_STATE_HARD_CORRECTION    230
+#define SENSOR_STATE_SEARCH_SPEED       400
 /* Backward recovery uses short 330-PWM pulses to avoid continuous fast reverse. */
-#define SENSOR_STATE_BACKWARD_SPEED     330
+#define SENSOR_STATE_BACKWARD_SPEED     350
 #define SENSOR_STATE_BACKWARD_ON_TICKS  2
 #define SENSOR_STATE_BACKWARD_PERIOD_TICKS 10
 #define POOR_TRACKING_TIMEOUT        100  // 100 * 2ms = 200ms
