@@ -42,7 +42,7 @@ extern volatile uint8_t oledProductMode;
  *   MIN_SPEED 太高，降低 MIN_SPEED。
  */
 #define BASE_SPEED        400
-#define MIN_SPEED         200     /* 降低使转向时内侧轮减速更多 */
+#define MIN_SPEED         350     /* 降低使转向时内侧轮减速更多 */
 #define MAX_SPEED         600
 #define STRAIGHT_TEST_SPEED BASE_SPEED
 
@@ -53,11 +53,11 @@ extern volatile uint8_t oledProductMode;
 /* 原 SPEED_COMPENSATION 用于 sensor_state 和直行测试模式 */
 #define SPEED_COMPENSATION 4
 
-#define KP                2.4f
-#define KI                0.04f    /* 微量积分消除稳态偏差 */
-#define KD                1.6f
-#define INTEGRAL_MAX      30.0f    /* 积分限幅 */
-#define MAX_CORRECTION    350      /* 增大最大修正量 */
+#define KP                2.0f
+#define KI                0.0f    /* 微量积分消除稳态偏差 */
+#define KD                1.2f
+#define INTEGRAL_MAX      40.0f    /* 积分限幅 */
+#define MAX_CORRECTION    300      /* 增大最大修正量 */
 
 /* 微分低通滤波系数: 0=不滤波, 1=完全滤波 */
 #define DERIVATIVE_LPF_ALPHA  0.3f

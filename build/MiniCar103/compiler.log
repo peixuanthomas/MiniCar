@@ -1,10 +1,7 @@
 >>> cc
 
-".\App\src\UsrTimer.c", line 102: Warning:  #550-D: variable "last_state_correction"  was set but never used
-  static int   last_state_correction = 0;
-               ^
-.\App\src\UsrTimer.c: 1 warning, 0 errors
+
 
 >>> ld
 
-Program Size: Code=18372 RO-data=3344 RW-data=868 ZI-data=2460  
+Program Size: Code=18376 RO-data=3344 RW-data=868 ZI-data=2460  

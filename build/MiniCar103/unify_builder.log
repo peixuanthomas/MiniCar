@@ -668,3 +668,30 @@ These source files will be recompiled
 [2026-05-13 19:04:12]	[done]
 	build successfully !
 
+[2026-05-20 17:10:44]	[info] incremental build: 1 source files changed
+These source files will be recompiled
+---
+'d:\gitgitgit(magicbook)\MiniCar\App\src\UsrTimer.c': source file has been changed.
+
+[2026-05-20 17:10:45]	[done]
+	build successfully !
+
+[2026-05-20 17:13:24]	[info] incremental build: 1 source files changed
+These source files will be recompiled
+---
+'d:\gitgitgit(magicbook)\MiniCar\App\src\UsrTimer.c': source file has been changed.
+
+[2026-05-20 17:13:24]	[done]
+	build successfully !
+
+[2026-05-20 17:16:15]	[info] incremental build: 1 source files changed
+These source files will be recompiled
+---
+'d:\gitgitgit(magicbook)\MiniCar\App\src\UsrTimer.c': source file has been changed.
+
+[2026-05-20 17:16:16]	[done]
+	build successfully !
+
+[2026-05-20 17:16:28]	[done]
+	build successfully !
+
