@@ -31,6 +31,10 @@ int main(void)
         0x55U, 0x0AU, 0x00U, 0x01U, 0x00U, 0x00U,
         0x05U, 0x02U, 0x00U, 0x00U, 0x00U, 0x67U
     };
+    static const uint8_t over_range_frame[] = {
+        0x55U, 0x0AU, 0x00U, 0x01U, 0x00U, 0x00U,
+        0x05U, 0x02U, 0x08U, 0x34U, 0x00U, 0xA3U
+    };
     uint16_t distance_mm = 0U;
 
     LaserDistance_TestResetParser();
@@ -59,12 +63,15 @@ int main(void)
 
     LaserDistance_TestResetParser();
     distance_mm = 1234U;
-    if (!feed_bytes(zero_distance_frame, sizeof(zero_distance_frame), &distance_mm)) {
-        printf("zero distance frame did not parse\n");
+    if (feed_bytes(zero_distance_frame, sizeof(zero_distance_frame), &distance_mm)) {
+        printf("zero distance parsed as %u mm\n", distance_mm);
         return 1;
     }
-    if (distance_mm != 0U) {
-        printf("expected 0 mm, got %u\n", distance_mm);
+
+    LaserDistance_TestResetParser();
+    distance_mm = 1234U;
+    if (feed_bytes(over_range_frame, sizeof(over_range_frame), &distance_mm)) {
+        printf("over range distance parsed as %u mm\n", distance_mm);
         return 1;
     }
 

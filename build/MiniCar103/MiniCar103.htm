@@ -3,7 +3,7 @@
 <title>Static Call Graph - [.\build\MiniCar103\MiniCar103.axf]</title></head>
 <body><HR>
 <H1>Static Call Graph for image .\build\MiniCar103\MiniCar103.axf</H1><HR>
-<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 5060960: Last Updated: Sun May 24 14:20:12 2026
+<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 5060960: Last Updated: Sun May 24 14:40:34 2026
 <BR><P>
 <H3>Maximum Stack Usage =        208 bytes + Unknown(Cycles, Untraceable Function Pointers)</H3><H3>
 Call chain for Maximum Stack Depth:</H3>
@@ -1093,7 +1093,7 @@ Global Symbols
 </UL>
 
 <P><STRONG><a name="[5]"></a>LaserDistanceFunc</STRONG> (Thumb, 4 bytes, Stack size 0 bytes, TaskMain.o(i.LaserDistanceFunc))
-<BR><BR>[Stack]<UL><LI>Max Depth = 96<LI>Call Chain = LaserDistanceFunc &rArr; LaserDistance_Task &rArr; HAL_UART_Transmit &rArr; UART_WaitOnFlagUntilTimeout
+<BR><BR>[Stack]<UL><LI>Max Depth = 104<LI>Call Chain = LaserDistanceFunc &rArr; LaserDistance_Task &rArr; HAL_UART_Transmit &rArr; UART_WaitOnFlagUntilTimeout
 </UL>
 <BR>[Calls]<UL><LI><a href="#[cc]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;LaserDistance_Task
 </UL>
@@ -1121,7 +1121,7 @@ Global Symbols
 <BR>[Called By]<UL><LI><a href="#[67]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;BoardInit
 </UL>
 
-<P><STRONG><a name="[cd]"></a>LaserDistance_IsStale</STRONG> (Thumb, 32 bytes, Stack size 8 bytes, laser_distance.o(i.LaserDistance_IsStale))
+<P><STRONG><a name="[cd]"></a>LaserDistance_IsStale</STRONG> (Thumb, 30 bytes, Stack size 8 bytes, laser_distance.o(i.LaserDistance_IsStale))
 <BR><BR>[Stack]<UL><LI>Max Depth = 8<LI>Call Chain = LaserDistance_IsStale
 </UL>
 <BR>[Calls]<UL><LI><a href="#[63]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_GetTick
@@ -1129,8 +1129,8 @@ Global Symbols
 <BR>[Called By]<UL><LI><a href="#[7b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;LaserDistance_HasValidDistance
 </UL>
 
-<P><STRONG><a name="[cc]"></a>LaserDistance_Task</STRONG> (Thumb, 108 bytes, Stack size 32 bytes, laser_distance.o(i.LaserDistance_Task))
-<BR><BR>[Stack]<UL><LI>Max Depth = 96<LI>Call Chain = LaserDistance_Task &rArr; HAL_UART_Transmit &rArr; UART_WaitOnFlagUntilTimeout
+<P><STRONG><a name="[cc]"></a>LaserDistance_Task</STRONG> (Thumb, 132 bytes, Stack size 40 bytes, laser_distance.o(i.LaserDistance_Task))
+<BR><BR>[Stack]<UL><LI>Max Depth = 104<LI>Call Chain = LaserDistance_Task &rArr; HAL_UART_Transmit &rArr; UART_WaitOnFlagUntilTimeout
 </UL>
 <BR>[Calls]<UL><LI><a href="#[d0]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;uart_fifo_get
 <LI><a href="#[c6]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_UART_Transmit
@@ -1768,7 +1768,7 @@ Local Symbols
 <BR>[Called By]<UL><LI><a href="#[9d]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;HAL_TIM_PeriodElapsedCallback
 </UL>
 
-<P><STRONG><a name="[cf]"></a>LaserDistance_ParseFrame</STRONG> (Thumb, 198 bytes, Stack size 20 bytes, laser_distance.o(i.LaserDistance_ParseFrame))
+<P><STRONG><a name="[cf]"></a>LaserDistance_ParseFrame</STRONG> (Thumb, 200 bytes, Stack size 20 bytes, laser_distance.o(i.LaserDistance_ParseFrame))
 <BR><BR>[Stack]<UL><LI>Max Depth = 20<LI>Call Chain = LaserDistance_ParseFrame
 </UL>
 <BR>[Called By]<UL><LI><a href="#[ce]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;LaserDistance_ProcessByte

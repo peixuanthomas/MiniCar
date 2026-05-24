@@ -7,9 +7,15 @@
 
 #define LASER_DISTANCE_FRAME_MAX_LEN 32U
 #define LASER_DISTANCE_QUERY_INTERVAL_MS 200U
-#define LASER_DISTANCE_STALE_MS 10000U
+#define LASER_DISTANCE_STALE_MS 1000U
 #define LASER_DISTANCE_MIN_VALID_MM 40U
 #define LASER_DISTANCE_MAX_VALID_MM 2000U
+
+typedef enum {
+    LASER_DISTANCE_PARSE_NONE = 0U,
+    LASER_DISTANCE_PARSE_VALID = 1U,
+    LASER_DISTANCE_PARSE_OUT_OF_RANGE = 2U
+} LaserDistance_ParseResult_t;
 
 static uint8_t rx_frame[LASER_DISTANCE_FRAME_MAX_LEN];
 static uint8_t rx_count = 0U;
@@ -68,7 +74,7 @@ static uint8_t LaserDistance_DistanceInRange(uint16_t distance_mm)
             (distance_mm <= LASER_DISTANCE_MAX_VALID_MM)) ? 1U : 0U;
 }
 
-static uint8_t LaserDistance_ParseFrame(const uint8_t *frame, uint8_t frame_len, uint16_t *distance_mm)
+static LaserDistance_ParseResult_t LaserDistance_ParseFrame(const uint8_t *frame, uint8_t frame_len, uint16_t *distance_mm)
 {
     uint16_t parsed_distance;
 
@@ -77,11 +83,11 @@ static uint8_t LaserDistance_ParseFrame(const uint8_t *frame, uint8_t frame_len,
 
     if (frame_len != 12U) {
         g_laser_distance_debug.field_fail_count++;
-        return 0U;
+        return LASER_DISTANCE_PARSE_NONE;
     }
     if (!LaserDistance_ChecksumValid(frame, frame_len)) {
         g_laser_distance_debug.checksum_fail_count++;
-        return 0U;
+        return LASER_DISTANCE_PARSE_NONE;
     }
     g_laser_distance_debug.last_status = frame[5];
     g_laser_distance_debug.last_func = frame[6];
@@ -91,29 +97,30 @@ static uint8_t LaserDistance_ParseFrame(const uint8_t *frame, uint8_t frame_len,
         (frame[6] != 0x05U) ||
         (frame[7] != 0x02U)) {
         g_laser_distance_debug.field_fail_count++;
-        return 0U;
+        return LASER_DISTANCE_PARSE_NONE;
     }
 
     parsed_distance = ((uint16_t)frame[8] << 8U) | frame[9];
     g_laser_distance_debug.last_distance_mm = parsed_distance;
+    *distance_mm = parsed_distance;
     if (!LaserDistance_DistanceInRange(parsed_distance)) {
         g_laser_distance_debug.range_fail_count++;
+        return LASER_DISTANCE_PARSE_OUT_OF_RANGE;
     }
 
-    *distance_mm = parsed_distance;
-    return 1U;
+    return LASER_DISTANCE_PARSE_VALID;
 }
 
-static uint8_t LaserDistance_ProcessByte(uint8_t byte, uint16_t *distance_mm)
+static LaserDistance_ParseResult_t LaserDistance_ProcessByte(uint8_t byte, uint16_t *distance_mm)
 {
     if (rx_count == 0U) {
         if (byte != 0x55U) {
             g_laser_distance_debug.sync_drop_count++;
-            return 0U;
+            return LASER_DISTANCE_PARSE_NONE;
         }
         rx_frame[rx_count++] = byte;
         expected_len = 0U;
-        return 0U;
+        return LASER_DISTANCE_PARSE_NONE;
     }
 
     rx_frame[rx_count++] = byte;
@@ -124,11 +131,11 @@ static uint8_t LaserDistance_ProcessByte(uint8_t byte, uint16_t *distance_mm)
             rx_count = 0U;
             expected_len = 0U;
         }
-        return 0U;
+        return LASER_DISTANCE_PARSE_NONE;
     }
 
     if ((expected_len > 0U) && (rx_count >= expected_len)) {
-        uint8_t parsed = LaserDistance_ParseFrame(rx_frame, expected_len, distance_mm);
+        LaserDistance_ParseResult_t parsed = LaserDistance_ParseFrame(rx_frame, expected_len, distance_mm);
         rx_count = 0U;
         expected_len = 0U;
         return parsed;
@@ -139,7 +146,7 @@ static uint8_t LaserDistance_ProcessByte(uint8_t byte, uint16_t *distance_mm)
         expected_len = 0U;
     }
 
-    return 0U;
+    return LASER_DISTANCE_PARSE_NONE;
 }
 
 void LaserDistance_Init(void)
@@ -200,13 +207,19 @@ void LaserDistance_Task(void)
     }
 
     while ((drain_guard > 0U) && (uart_fifo_get(&g_uart3, &byte) == 0)) {
+        LaserDistance_ParseResult_t parse_result;
+
         drain_guard--;
         g_laser_distance_debug.rx_bytes++;
-        if (LaserDistance_ProcessByte(byte, &distance_mm)) {
+        parse_result = LaserDistance_ProcessByte(byte, &distance_mm);
+        if (parse_result == LASER_DISTANCE_PARSE_VALID) {
             latest_distance_mm = distance_mm;
             latest_valid = 1U;
             last_valid_tick = now;
             g_laser_distance_debug.valid_count++;
+        } else if (parse_result == LASER_DISTANCE_PARSE_OUT_OF_RANGE) {
+            latest_distance_mm = distance_mm;
+            latest_valid = 0U;
         }
     }
 }
@@ -236,7 +249,7 @@ void LaserDistance_TestResetParser(void)
 
 uint8_t LaserDistance_TestParseByte(uint8_t byte, uint16_t *distance_mm)
 {
-    return LaserDistance_ProcessByte(byte, distance_mm);
+    return (LaserDistance_ProcessByte(byte, distance_mm) == LASER_DISTANCE_PARSE_VALID) ? 1U : 0U;
 }
 #endif
 

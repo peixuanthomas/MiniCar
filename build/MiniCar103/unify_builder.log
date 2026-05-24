@@ -746,3 +746,11 @@ These source files will be recompiled
 [2026-05-24 14:20:12]	[done]
 	build successfully !
 
+[2026-05-24 14:40:34]	[info] incremental build: 1 source files changed
+These source files will be recompiled
+---
+'c:\Mac\Home\Desktop\Car\MiniCar\Bsp\src\laser_distance.c': source file has been changed.
+
+[2026-05-24 14:40:34]	[done]
+	build successfully !
+
