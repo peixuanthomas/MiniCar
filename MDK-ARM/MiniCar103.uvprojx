@@ -769,6 +769,11 @@
               <FilePath>..\App\src\TaskMain.c</FilePath>
             </File>
             <File>
+              <FileName>RunTimer.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\App\src\RunTimer.c</FilePath>
+            </File>
+            <File>
               <FileName>UsrTimer.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\App\src\UsrTimer.c</FilePath>

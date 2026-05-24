@@ -1,9 +1,12 @@
+.\build\MiniCar103\.obj\App\src\ObstacleAvoidance.o
+.\build\MiniCar103\.obj\App\src\RunTimer.o
 .\build\MiniCar103\.obj\App\src\TaskMain.o
 .\build\MiniCar103\.obj\App\src\UsrTimer.o
 .\build\MiniCar103\.obj\Bsp\src\Board.o
 .\build\MiniCar103\.obj\Bsp\src\FIFO.o
 .\build\MiniCar103\.obj\Bsp\src\Motor.o
 .\build\MiniCar103\.obj\Bsp\src\adc_bat.o
+.\build\MiniCar103\.obj\Bsp\src\laser_distance.o
 .\build\MiniCar103\.obj\Bsp\src\oled\i2c_oled.o
 .\build\MiniCar103\.obj\Bsp\src\oled\oled_api.o
 .\build\MiniCar103\.obj\Bsp\src\uart.o

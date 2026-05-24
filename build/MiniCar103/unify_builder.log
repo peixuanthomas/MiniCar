@@ -706,3 +706,43 @@ These source files will be recompiled
 [2026-05-23 15:18:40]	[done]
 	build successfully !
 
+[2026-05-24 14:20:07]	[info] incremental build: 33 source files changed
+These source files will be recompiled
+---
+'c:\Mac\Home\Desktop\Car\MiniCar\App\src\ObstacleAvoidance.c': object (.o) file not exist
+'c:\Mac\Home\Desktop\Car\MiniCar\App\src\RunTimer.c': object (.o) file not exist
+'c:\Mac\Home\Desktop\Car\MiniCar\App\src\TaskMain.c': object (.o) file not exist
+'c:\Mac\Home\Desktop\Car\MiniCar\App\src\UsrTimer.c': object (.o) file not exist
+'c:\Mac\Home\Desktop\Car\MiniCar\Bsp\src\Board.c': object (.o) file not exist
+'c:\Mac\Home\Desktop\Car\MiniCar\Bsp\src\FIFO.c': object (.o) file not exist
+'c:\Mac\Home\Desktop\Car\MiniCar\Bsp\src\Motor.c': object (.o) file not exist
+'c:\Mac\Home\Desktop\Car\MiniCar\Bsp\src\adc_bat.c': object (.o) file not exist
+'c:\Mac\Home\Desktop\Car\MiniCar\Bsp\src\laser_distance.c': object (.o) file not exist
+'c:\Mac\Home\Desktop\Car\MiniCar\Bsp\src\oled\i2c_oled.c': object (.o) file not exist
+'c:\Mac\Home\Desktop\Car\MiniCar\Bsp\src\oled\oled_api.c': object (.o) file not exist
+'c:\Mac\Home\Desktop\Car\MiniCar\Bsp\src\uart.c': object (.o) file not exist
+'c:\Mac\Home\Desktop\Car\MiniCar\Core\Src\main.c': object (.o) file not exist
+'c:\Mac\Home\Desktop\Car\MiniCar\Core\Src\stm32f1xx_hal_msp.c': object (.o) file not exist
+'c:\Mac\Home\Desktop\Car\MiniCar\Core\Src\stm32f1xx_it.c': object (.o) file not exist
+'c:\Mac\Home\Desktop\Car\MiniCar\Core\Src\system_stm32f1xx.c': object (.o) file not exist
+'c:\Mac\Home\Desktop\Car\MiniCar\Drivers\STM32F1xx_HAL_Driver\Src\stm32f1xx_hal.c': object (.o) file not exist
+'c:\Mac\Home\Desktop\Car\MiniCar\Drivers\STM32F1xx_HAL_Driver\Src\stm32f1xx_hal_adc.c': object (.o) file not exist
+'c:\Mac\Home\Desktop\Car\MiniCar\Drivers\STM32F1xx_HAL_Driver\Src\stm32f1xx_hal_adc_ex.c': object (.o) file not exist
+'c:\Mac\Home\Desktop\Car\MiniCar\Drivers\STM32F1xx_HAL_Driver\Src\stm32f1xx_hal_cortex.c': object (.o) file not exist
+'c:\Mac\Home\Desktop\Car\MiniCar\Drivers\STM32F1xx_HAL_Driver\Src\stm32f1xx_hal_dma.c': object (.o) file not exist
+'c:\Mac\Home\Desktop\Car\MiniCar\Drivers\STM32F1xx_HAL_Driver\Src\stm32f1xx_hal_exti.c': object (.o) file not exist
+'c:\Mac\Home\Desktop\Car\MiniCar\Drivers\STM32F1xx_HAL_Driver\Src\stm32f1xx_hal_flash.c': object (.o) file not exist
+'c:\Mac\Home\Desktop\Car\MiniCar\Drivers\STM32F1xx_HAL_Driver\Src\stm32f1xx_hal_flash_ex.c': object (.o) file not exist
+'c:\Mac\Home\Desktop\Car\MiniCar\Drivers\STM32F1xx_HAL_Driver\Src\stm32f1xx_hal_gpio.c': object (.o) file not exist
+'c:\Mac\Home\Desktop\Car\MiniCar\Drivers\STM32F1xx_HAL_Driver\Src\stm32f1xx_hal_gpio_ex.c': object (.o) file not exist
+'c:\Mac\Home\Desktop\Car\MiniCar\Drivers\STM32F1xx_HAL_Driver\Src\stm32f1xx_hal_pwr.c': object (.o) file not exist
+'c:\Mac\Home\Desktop\Car\MiniCar\Drivers\STM32F1xx_HAL_Driver\Src\stm32f1xx_hal_rcc.c': object (.o) file not exist
+'c:\Mac\Home\Desktop\Car\MiniCar\Drivers\STM32F1xx_HAL_Driver\Src\stm32f1xx_hal_rcc_ex.c': object (.o) file not exist
+'c:\Mac\Home\Desktop\Car\MiniCar\Drivers\STM32F1xx_HAL_Driver\Src\stm32f1xx_hal_tim.c': object (.o) file not exist
+'c:\Mac\Home\Desktop\Car\MiniCar\Drivers\STM32F1xx_HAL_Driver\Src\stm32f1xx_hal_tim_ex.c': object (.o) file not exist
+'c:\Mac\Home\Desktop\Car\MiniCar\Drivers\STM32F1xx_HAL_Driver\Src\stm32f1xx_hal_uart.c': object (.o) file not exist
+'c:\Mac\Home\Desktop\Car\MiniCar\MDK-ARM\startup_stm32f103xb.s': object (.o) file not exist
+
+[2026-05-24 14:20:12]	[done]
+	build successfully !
+

@@ -22,6 +22,7 @@
 #include "TaskMain.h"
 #include "Board.h"
 #include "UsrTimer.h"
+#include "RunTimer.h"
 
 volatile uint8_t runFlag = 0;   // 0 停止，1 运行
 volatile uint8_t oledProductMode = 0;
@@ -72,6 +73,13 @@ static void OledShowStatusPage(void)
 	OLED_ShowNum(40, 32, Adc_GetMilliVolt(), 4, OLED_8X16);
 }
 
+static void OledShowProductPage(void)
+{
+	OLED_ShowString(0, 0, "Product of", OLED_8X16);
+	OLED_ShowString(0, 16, "Team Seven", OLED_8X16);
+	OLED_Printf(0, 32, OLED_8X16, "Time:%5lu s", (unsigned long)RunTimer_GetElapsedSeconds(HAL_GetTick()));
+}
+
 static void StartBuzzTwice(void)
 {
 	key1BuzzSteps = 4;
@@ -106,6 +114,7 @@ void ChkKey0Func(void)
     } else {
         if (Cont > 4) { // >20ms
             runFlag ^= 1;                // 翻转运行状态
+            RunTimer_SetRunning(runFlag, HAL_GetTick());
             printf("RunFlag = %d\r\n", runFlag);
             if (runFlag == 0) {          // 切到停止时停轮
                 Motor_SetSpeed(&motor_left, 0);
@@ -140,9 +149,7 @@ void ChkKey1Func(void)
             oledProductMode ^= 1;
             OLED_Clear();
             if (oledProductMode) {
-                OLED_ShowString(0, 0, "Product of", OLED_8X16);
-                OLED_ShowString(0, 16, "Team Seven", OLED_8X16);
-                //OLED_ShowString(0, 32, "Seven", OLED_8X16);
+                OledShowProductPage();
             } else {
                 OledShowStatusPage();
             }
