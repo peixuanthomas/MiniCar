@@ -28,6 +28,7 @@ extern "C" {
 #include "stm32f1xx_hal.h"
 
 #include "uart.h"
+#include "laser_distance.h"
 #include "i2c_oled.h"
 #include "oled_api.h"
 #include "adc_bat.h"

@@ -65,7 +65,6 @@ void _sys_exit(int x)
 int fputc(int ch, FILE *f)
 {
 	uart_fifo_put(&g_uart1, (uint8_t)ch);
-	uart_fifo_put(&g_uart3, (uint8_t)ch);
 	return ch;
 }
 

@@ -773,6 +773,11 @@
               <FileType>1</FileType>
               <FilePath>..\App\src\UsrTimer.c</FilePath>
             </File>
+            <File>
+              <FileName>ObstacleAvoidance.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\App\src\ObstacleAvoidance.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -802,6 +807,11 @@
               <FileName>Motor.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\Bsp\src\Motor.c</FilePath>
+            </File>
+            <File>
+              <FileName>laser_distance.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Bsp\src\laser_distance.c</FilePath>
             </File>
           </Files>
         </Group>

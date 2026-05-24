@@ -38,8 +38,9 @@ void BoardInit(void)
 	BoardStartupBeep();
 	InitMwUart1();
 	InitMwUart3();
+	LaserDistance_Init();
 	OLED_Init();
-	OLED_ShowString(0, 0, "FLAG:", OLED_8X16);
+	OLED_ShowString(0, 0, "dist: ---- mm", OLED_8X16);
 	OLED_ShowString(0, 16, "SEN:", OLED_8X16);
 	OLED_ShowString(0, 32, "BAT:", OLED_8X16);
 	OLED_ShowString(72, 32, "mV", OLED_8X16);

@@ -6,6 +6,7 @@
   */
 
 #include "UsrTimer.h"
+#include "ObstacleAvoidance.h"
 #include "stdio.h"
 #include <stdbool.h>
 
@@ -396,8 +397,13 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
     if (runFlag == 0) {
         Motor_SetSpeed(&motor_left, 0);
         Motor_SetSpeed(&motor_right, 0);
+        ObstacleAvoidance_Reset();
         reset_line_control_state();
         reset_line_debug();
+        return;
+    }
+
+    if (ObstacleAvoidance_Update2ms()) {
         return;
     }
 

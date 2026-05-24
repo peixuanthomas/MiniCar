@@ -31,7 +31,7 @@ void Led1Func(void);
 void Led2Func(void);
 void BuzzFunc(void);
 void Uart1Func(void);
-void Uart3Func(void);
+void LaserDistanceFunc(void);
 void PntFunc(void);
 void ChkKey0Func(void);
 void ChkKey1Func(void);
@@ -59,11 +59,15 @@ static void OledShowStatusPage(void)
 
 	ReadSensorDisplayString(SensorVal);
 
-	OLED_ShowString(0, 0, "FLAG:", OLED_8X16);
+	OLED_ClearArea(0, 0, 128, 16);
+	if (LaserDistance_HasValidDistance()) {
+		OLED_Printf(0, 0, OLED_8X16, "dist:%4u mm", LaserDistance_GetDistanceMm());
+	} else {
+		OLED_ShowString(0, 0, "dist: ---- mm", OLED_8X16);
+	}
 	OLED_ShowString(0, 16, "SEN:", OLED_8X16);
 	OLED_ShowString(0, 32, "BAT:", OLED_8X16);
 	OLED_ShowString(72, 32, "mV", OLED_8X16);
-	OLED_ShowNum(48, 0, runFlag, 1, OLED_8X16);
 	OLED_ShowString(40, 16, (char *)SensorVal, OLED_8X16);
 	OLED_ShowNum(40, 32, Adc_GetMilliVolt(), 4, OLED_8X16);
 }
@@ -79,7 +83,7 @@ TASK_COMPONENTS TaskComps[TASK_MAX] = {
 	{0, 5, 10, OLED_Update_InPages},	//OLED屏的刷新任务
 	{0, 3, 100, BuzzFunc},
 	{0, 4, 100, Uart1Func},
-	{0, 4, 100, Uart3Func},
+	{0, 4, 100, LaserDistanceFunc},
 	{0, 4, 100, ChkSenFunc},
 	{0, 4, 500, AdcReadTask},
 	{0, 3, 1000, Led1Func},
@@ -210,21 +214,16 @@ void Uart1Func(void)
 		uart_fifo_puts(&g_uart1, buf, len);
 }
 
-/** UART3检查函数
-  * @brief  UART3接收缓冲区数据检查，然后将收到的数据直接发回原有UART
-  *         预期每100ms执行一次，第7ms执行
+/** Laser distance task
+  * @brief  Poll ATK-MS53L0M distance data on UART3.
+  *         Runs every 100ms.
   * @param  None
   * @retval None
   */
-void Uart3Func(void)
+void LaserDistanceFunc(void)
 {
-	int len;
-	uint8_t buf[64];
-	len = uart_fifo_gets(&g_uart3, buf, 64);
-	if(len>0)
-		uart_fifo_puts(&g_uart3, buf, len);
+	LaserDistance_Task();
 }
-
 /** 定期打印函数
   * @brief  定期打印测试
   *         预期每1000ms执行一次，第8ms执行
@@ -254,7 +253,15 @@ void ChkSenFunc(void)
 
 	uint8_t SensorVal[SENSOR_DISPLAY_STR_LEN];
 	ReadSensorDisplayString(SensorVal);
-	OLED_ShowNum(48, 0, runFlag, 1, OLED_8X16);
+	OLED_ClearArea(0, 0, 128, 16);
+	if (LaserDistance_HasValidDistance()) {
+		OLED_Printf(0, 0, OLED_8X16, "dist:%4u mm", LaserDistance_GetDistanceMm());
+	} else {
+		OLED_ShowString(0, 0, "dist: ---- mm", OLED_8X16);
+	}
+	OLED_ShowString(0, 16, "SEN:", OLED_8X16);
+	OLED_ShowString(0, 32, "BAT:", OLED_8X16);
+	OLED_ShowString(72, 32, "mV", OLED_8X16);
 	OLED_ShowString(40, 16, (char *)SensorVal, OLED_8X16);
 	OLED_ShowString(0, 48, "e=", OLED_8X16);
 	OLED_ShowSignedNum(16, 48, g_line_error_x10, 3, OLED_8X16);
