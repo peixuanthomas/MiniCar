@@ -21,6 +21,8 @@ typedef struct _TASK_COMPONENTS
 //任务列表
 extern TASK_COMPONENTS TaskComps[];
 
+void BuzzStartOnce(void);
+
 #ifdef __cplusplus
 }
 #endif

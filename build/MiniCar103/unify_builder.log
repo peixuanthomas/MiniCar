@@ -754,3 +754,28 @@ These source files will be recompiled
 [2026-05-24 14:40:34]	[done]
 	build successfully !
 
+[2026-05-24 14:53:07]	[info] incremental build: 4 source files changed
+These source files will be recompiled
+---
+'c:\Mac\Home\Desktop\Car\MiniCar\App\src\ObstacleAvoidance.c': source file has been changed.
+'c:\Mac\Home\Desktop\Car\MiniCar\App\src\TaskMain.c': source file has been changed.
+'c:\Mac\Home\Desktop\Car\MiniCar\Core\Src\main.c': dependence 'c:\Mac\Home\Desktop\Car\MiniCar\App\inc\TaskMain.h' has been changed.
+'c:\Mac\Home\Desktop\Car\MiniCar\Core\Src\stm32f1xx_it.c': dependence 'c:\Mac\Home\Desktop\Car\MiniCar\App\inc\TaskMain.h' has been changed.
+
+[2026-05-24 14:53:08]	[done]
+	build successfully !
+
+[2026-05-24 14:59:54]	[info] incremental build: 7 source files changed
+These source files will be recompiled
+---
+'c:\Mac\Home\Desktop\Car\MiniCar\App\src\ObstacleAvoidance.c': source file has been changed.
+'c:\Mac\Home\Desktop\Car\MiniCar\App\src\TaskMain.c': dependence 'c:\Mac\Home\Desktop\Car\MiniCar\Bsp\inc\laser_distance.h' has been changed.
+'c:\Mac\Home\Desktop\Car\MiniCar\App\src\UsrTimer.c': dependence 'c:\Mac\Home\Desktop\Car\MiniCar\Bsp\inc\laser_distance.h' has been changed.
+'c:\Mac\Home\Desktop\Car\MiniCar\Bsp\src\Board.c': dependence 'c:\Mac\Home\Desktop\Car\MiniCar\Bsp\inc\laser_distance.h' has been changed.
+'c:\Mac\Home\Desktop\Car\MiniCar\Bsp\src\laser_distance.c': source file has been changed.
+'c:\Mac\Home\Desktop\Car\MiniCar\Core\Src\main.c': dependence 'c:\Mac\Home\Desktop\Car\MiniCar\Bsp\inc\laser_distance.h' has been changed.
+'c:\Mac\Home\Desktop\Car\MiniCar\Core\Src\stm32f1xx_it.c': dependence 'c:\Mac\Home\Desktop\Car\MiniCar\Bsp\inc\laser_distance.h' has been changed.
+
+[2026-05-24 14:59:57]	[done]
+	build successfully !
+

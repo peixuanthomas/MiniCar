@@ -85,6 +85,11 @@ static void StartBuzzTwice(void)
 	key1BuzzSteps = 4;
 }
 
+void BuzzStartOnce(void)
+{
+	key1BuzzSteps = 2;
+}
+
 TASK_COMPONENTS TaskComps[TASK_MAX] = {
 	{0, 1, 4, ChkKey0Func},			// 检测Key0的任务，预期每5ms执行一次，在第1ms执行
 	{0, 1, 4, ChkKey1Func},			// 检测Key1的任务，预期每5ms执行一次，在第2ms执行

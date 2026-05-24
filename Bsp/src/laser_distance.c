@@ -23,6 +23,7 @@ static uint8_t expected_len = 0U;
 
 static uint16_t latest_distance_mm = 0U;
 static uint8_t latest_valid = 0U;
+static uint32_t latest_valid_sequence = 0U;
 
 volatile LaserDistance_Debug_t g_laser_distance_debug;
 
@@ -157,6 +158,7 @@ void LaserDistance_Init(void)
     expected_len = 0U;
     latest_distance_mm = 0U;
     latest_valid = 0U;
+    latest_valid_sequence = 0U;
     g_laser_distance_debug.rx_bytes = 0U;
     g_laser_distance_debug.query_count = 0U;
     g_laser_distance_debug.frame_count = 0U;
@@ -215,6 +217,7 @@ void LaserDistance_Task(void)
         if (parse_result == LASER_DISTANCE_PARSE_VALID) {
             latest_distance_mm = distance_mm;
             latest_valid = 1U;
+            latest_valid_sequence++;
             last_valid_tick = now;
             g_laser_distance_debug.valid_count++;
         } else if (parse_result == LASER_DISTANCE_PARSE_OUT_OF_RANGE) {
@@ -261,4 +264,9 @@ uint8_t LaserDistance_HasValidDistance(void)
 uint16_t LaserDistance_GetDistanceMm(void)
 {
     return latest_distance_mm;
+}
+
+uint32_t LaserDistance_GetValidSequence(void)
+{
+    return latest_valid_sequence;
 }

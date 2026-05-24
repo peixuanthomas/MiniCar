@@ -32,6 +32,7 @@ void LaserDistance_Init(void);
 void LaserDistance_Task(void);
 uint8_t LaserDistance_HasValidDistance(void);
 uint16_t LaserDistance_GetDistanceMm(void);
+uint32_t LaserDistance_GetValidSequence(void);
 uint8_t LaserDistance_IsStale(void);
 
 #ifdef LASER_DISTANCE_TEST

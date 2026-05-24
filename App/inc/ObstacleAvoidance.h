@@ -10,6 +10,11 @@ extern "C" {
 void ObstacleAvoidance_Reset(void);
 uint8_t ObstacleAvoidance_Update2ms(void);
 
+#ifdef OBSTACLE_AVOIDANCE_TEST
+void ObstacleAvoidance_TestResetDetector(void);
+uint8_t ObstacleAvoidance_TestFeedSample(uint8_t valid, uint16_t distance_mm);
+#endif
+
 #ifdef __cplusplus
 }
 #endif

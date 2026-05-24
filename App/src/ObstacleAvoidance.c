@@ -1,6 +1,11 @@
 #include "ObstacleAvoidance.h"
 
+#include "laser_distance.h"
+
+#ifndef OBSTACLE_AVOIDANCE_TEST
 #include "Board.h"
+#include "TaskMain.h"
+#endif
 
 /*
  * 避障参数说明：
@@ -29,6 +34,11 @@
 #define OBSTACLE_TRIGGER_MM 150U
 #define OBSTACLE_CLEAR_MM 220U
 #define OBSTACLE_MIN_USABLE_MM 40U
+#define OBSTACLE_APPROACH_START_MM 350U
+#define OBSTACLE_APPROACH_TOLERANCE_MM 15U
+#define OBSTACLE_MIN_APPROACH_SAMPLES 5U
+#define OBSTACLE_MIN_APPROACH_DECREASES 3U
+#define OBSTACLE_NEAR_CONFIRM_SAMPLES 2U
 #define OBSTACLE_SIDE_SPEED 360
 #define OBSTACLE_FORWARD_SPEED 380
 #define OBSTACLE_TURN_TICKS 250U
@@ -45,34 +55,122 @@ typedef enum {
 static ObstacleState_t obstacle_state = OBSTACLE_STATE_IDLE;
 static uint16_t state_ticks = 0U;
 static uint8_t trigger_armed = 1U;
+static uint32_t last_laser_sequence = 0U;
+
+static uint16_t detector_last_distance = 0U;
+static uint8_t detector_has_last = 0U;
+static uint8_t detector_valid_samples = 0U;
+static uint8_t detector_approach_decreases = 0U;
+static uint8_t detector_near_samples = 0U;
+static uint8_t detector_saw_far_sample = 0U;
+
+static void ObstacleDetector_Reset(void)
+{
+    detector_last_distance = 0U;
+    detector_has_last = 0U;
+    detector_valid_samples = 0U;
+    detector_approach_decreases = 0U;
+    detector_near_samples = 0U;
+    detector_saw_far_sample = 0U;
+}
+
+static void ObstacleDetector_StartTrack(uint16_t distance_mm)
+{
+    detector_last_distance = distance_mm;
+    detector_has_last = 1U;
+    detector_valid_samples = 1U;
+    detector_approach_decreases = 0U;
+    detector_near_samples = (distance_mm < OBSTACLE_TRIGGER_MM) ? 1U : 0U;
+    detector_saw_far_sample = (distance_mm >= OBSTACLE_TRIGGER_MM) ? 1U : 0U;
+}
+
+static uint8_t ObstacleDetector_Feed(uint8_t valid, uint16_t distance_mm)
+{
+    if (!valid ||
+        (distance_mm < OBSTACLE_MIN_USABLE_MM) ||
+        (distance_mm > OBSTACLE_APPROACH_START_MM)) {
+        ObstacleDetector_Reset();
+        return 0U;
+    }
+
+    if (!detector_has_last) {
+        ObstacleDetector_StartTrack(distance_mm);
+        return 0U;
+    }
+
+    if (distance_mm > (uint16_t)(detector_last_distance + OBSTACLE_APPROACH_TOLERANCE_MM)) {
+        ObstacleDetector_StartTrack(distance_mm);
+        return 0U;
+    }
+
+    if (detector_valid_samples < 255U) {
+        detector_valid_samples++;
+    }
+
+    if ((uint16_t)(distance_mm + OBSTACLE_APPROACH_TOLERANCE_MM) < detector_last_distance) {
+        if (detector_approach_decreases < 255U) {
+            detector_approach_decreases++;
+        }
+    }
+
+    if (distance_mm >= OBSTACLE_TRIGGER_MM) {
+        detector_saw_far_sample = 1U;
+        detector_near_samples = 0U;
+    } else if (detector_near_samples < 255U) {
+        detector_near_samples++;
+    }
+
+    detector_last_distance = distance_mm;
+
+    if (detector_saw_far_sample &&
+        (detector_valid_samples >= OBSTACLE_MIN_APPROACH_SAMPLES) &&
+        (detector_approach_decreases >= OBSTACLE_MIN_APPROACH_DECREASES) &&
+        (detector_near_samples >= OBSTACLE_NEAR_CONFIRM_SAMPLES)) {
+        ObstacleDetector_Reset();
+        return 1U;
+    }
+
+    return 0U;
+}
 
 static void ObstacleAvoidance_SetSpeed(int16_t left_speed, int16_t right_speed)
 {
+#ifndef OBSTACLE_AVOIDANCE_TEST
     Motor_SetSpeed(&motor_left, left_speed);
     Motor_SetSpeed(&motor_right, right_speed);
+#else
+    (void)left_speed;
+    (void)right_speed;
+#endif
 }
 
 static uint8_t ObstacleAvoidance_ShouldStart(void)
 {
     uint16_t distance_mm;
+    uint32_t laser_sequence;
 
     if (!LaserDistance_HasValidDistance()) {
+        ObstacleDetector_Reset();
         return 0U;
     }
 
-    distance_mm = LaserDistance_GetDistanceMm();
-    if (distance_mm < OBSTACLE_MIN_USABLE_MM) {
+    laser_sequence = LaserDistance_GetValidSequence();
+    if (laser_sequence == last_laser_sequence) {
         return 0U;
     }
+    last_laser_sequence = laser_sequence;
+
+    distance_mm = LaserDistance_GetDistanceMm();
 
     if (!trigger_armed) {
         if (distance_mm > OBSTACLE_CLEAR_MM) {
             trigger_armed = 1U;
+            ObstacleDetector_Reset();
         }
         return 0U;
     }
 
-    return (distance_mm < OBSTACLE_TRIGGER_MM) ? 1U : 0U;
+    return ObstacleDetector_Feed(1U, distance_mm);
 }
 
 void ObstacleAvoidance_Reset(void)
@@ -80,6 +178,8 @@ void ObstacleAvoidance_Reset(void)
     obstacle_state = OBSTACLE_STATE_IDLE;
     state_ticks = 0U;
     trigger_armed = 1U;
+    last_laser_sequence = 0U;
+    ObstacleDetector_Reset();
 }
 
 uint8_t ObstacleAvoidance_Update2ms(void)
@@ -92,6 +192,9 @@ uint8_t ObstacleAvoidance_Update2ms(void)
         obstacle_state = OBSTACLE_STATE_TURN_OUT;
         state_ticks = 0U;
         trigger_armed = 0U;
+#ifndef OBSTACLE_AVOIDANCE_TEST
+        BuzzStartOnce();
+#endif
     }
 
     switch (obstacle_state) {
@@ -132,3 +235,15 @@ uint8_t ObstacleAvoidance_Update2ms(void)
         return 0U;
     }
 }
+
+#ifdef OBSTACLE_AVOIDANCE_TEST
+void ObstacleAvoidance_TestResetDetector(void)
+{
+    ObstacleDetector_Reset();
+}
+
+uint8_t ObstacleAvoidance_TestFeedSample(uint8_t valid, uint16_t distance_mm)
+{
+    return ObstacleDetector_Feed(valid, distance_mm);
+}
+#endif
