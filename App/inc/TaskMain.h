@@ -22,6 +22,7 @@ typedef struct _TASK_COMPONENTS
 extern TASK_COMPONENTS TaskComps[];
 
 void BuzzStartOnce(void);
+void BuzzStartTimes(uint8_t times);
 
 #ifdef __cplusplus
 }

@@ -80,14 +80,19 @@ static void OledShowProductPage(void)
 	OLED_Printf(0, 32, OLED_8X16, "Time:%5lu s", (unsigned long)RunTimer_GetElapsedSeconds(HAL_GetTick()));
 }
 
+void BuzzStartTimes(uint8_t times)
+{
+	key1BuzzSteps = (uint8_t)(times * 2U);
+}
+
 static void StartBuzzTwice(void)
 {
-	key1BuzzSteps = 4;
+	BuzzStartTimes(2U);
 }
 
 void BuzzStartOnce(void)
 {
-	key1BuzzSteps = 2;
+	BuzzStartTimes(1U);
 }
 
 TASK_COMPONENTS TaskComps[TASK_MAX] = {

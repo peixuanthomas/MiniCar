@@ -779,3 +779,48 @@ These source files will be recompiled
 [2026-05-24 14:59:57]	[done]
 	build successfully !
 
+[2026-05-25 14:54:23]	[info] incremental build: 9 source files changed
+These source files will be recompiled
+---
+'c:\Mac\Home\Desktop\Car\MiniCar\App\src\ObstacleAvoidance.c': source file has been changed.
+'c:\Mac\Home\Desktop\Car\MiniCar\App\src\RunTimer.c': source file has been changed.
+'c:\Mac\Home\Desktop\Car\MiniCar\App\src\TaskMain.c': source file has been changed.
+'c:\Mac\Home\Desktop\Car\MiniCar\App\src\UsrTimer.c': source file has been changed.
+'c:\Mac\Home\Desktop\Car\MiniCar\Bsp\src\Board.c': source file has been changed.
+'c:\Mac\Home\Desktop\Car\MiniCar\Bsp\src\laser_distance.c': source file has been changed.
+'c:\Mac\Home\Desktop\Car\MiniCar\Bsp\src\uart.c': source file has been changed.
+'c:\Mac\Home\Desktop\Car\MiniCar\Core\Src\main.c': dependence 'c:\Mac\Home\Desktop\Car\MiniCar\App\inc\TaskMain.h' has been changed.
+'c:\Mac\Home\Desktop\Car\MiniCar\Core\Src\stm32f1xx_it.c': dependence 'c:\Mac\Home\Desktop\Car\MiniCar\App\inc\TaskMain.h' has been changed.
+
+[2026-05-25 14:54:25]	[done]
+	build successfully !
+
+[2026-05-25 15:18:02]	[info] incremental build: 5 source files changed
+These source files will be recompiled
+---
+'c:\Mac\Home\Desktop\Car\MiniCar\App\src\ObstacleAvoidance.c': source file has been changed.
+'c:\Mac\Home\Desktop\Car\MiniCar\App\src\TaskMain.c': source file has been changed.
+'c:\Mac\Home\Desktop\Car\MiniCar\App\src\UsrTimer.c': dependence 'c:\Mac\Home\Desktop\Car\MiniCar\App\inc\ObstacleAvoidance.h' has been changed.
+'c:\Mac\Home\Desktop\Car\MiniCar\Core\Src\main.c': dependence 'c:\Mac\Home\Desktop\Car\MiniCar\App\inc\TaskMain.h' has been changed.
+'c:\Mac\Home\Desktop\Car\MiniCar\Core\Src\stm32f1xx_it.c': dependence 'c:\Mac\Home\Desktop\Car\MiniCar\App\inc\TaskMain.h' has been changed.
+
+[2026-05-25 15:18:03]	[done]
+	build successfully !
+
+[2026-05-25 15:29:31]	[info] incremental build: 2 source files changed
+These source files will be recompiled
+---
+'c:\Mac\Home\Desktop\Car\MiniCar\App\src\ObstacleAvoidance.c': source file has been changed.
+'c:\Mac\Home\Desktop\Car\MiniCar\App\src\UsrTimer.c': source file has been changed.
+
+[2026-05-25 15:29:32]	[done]
+	build successfully !
+
+[2026-05-25 15:30:45]	[info] incremental build: 1 source files changed
+These source files will be recompiled
+---
+'c:\Mac\Home\Desktop\Car\MiniCar\App\src\UsrTimer.c': source file has been changed.
+
+[2026-05-25 15:30:46]	[done]
+	build successfully !
+

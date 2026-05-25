@@ -9,9 +9,9 @@
 
 /*
  * 避障参数说明：
- * - OBSTACLE_TRIGGER_MM：触发避障的距离阈值，单位 mm。当前 150 mm，
- *   表示激光测距小于 15 cm 时开始绕障。
- * - OBSTACLE_CLEAR_MM：避障触发后的重新允许触发距离，单位 mm。当前 220 mm。
+ * - OBSTACLE_TRIGGER_MM：触发避障的距离阈值，单位 mm。当前 600 mm，
+ *   表示激光测距小于 60 cm 时开始绕障。
+ * - OBSTACLE_CLEAR_MM：避障触发后的重新允许触发距离，单位 mm。当前 670 mm。
  *   只有距离重新大于该值后，下一次障碍物检测才会再次触发，避免在同一个障碍物前反复进入避障。
  * - OBSTACLE_MIN_USABLE_MM：测距模块的最小可信距离，单位 mm。当前 40 mm。
  *   小于该值通常是无效值或近距离异常值，不参与避障判断。
@@ -31,17 +31,17 @@
  * 如果转出不够，增大 OBSTACLE_TURN_TICKS 或 OBSTACLE_SIDE_SPEED；
  * 如果绕完后方向偏差明显，微调 OBSTACLE_RETURN_TICKS。
  */
-#define OBSTACLE_TRIGGER_MM 150U
-#define OBSTACLE_CLEAR_MM 220U
+#define OBSTACLE_TRIGGER_MM 600U
+#define OBSTACLE_CLEAR_MM 670U
 #define OBSTACLE_MIN_USABLE_MM 40U
-#define OBSTACLE_APPROACH_START_MM 350U
+#define OBSTACLE_APPROACH_START_MM 650U
 #define OBSTACLE_APPROACH_TOLERANCE_MM 15U
 #define OBSTACLE_MIN_APPROACH_SAMPLES 5U
 #define OBSTACLE_MIN_APPROACH_DECREASES 3U
 #define OBSTACLE_NEAR_CONFIRM_SAMPLES 2U
 #define OBSTACLE_SIDE_SPEED 360
 #define OBSTACLE_FORWARD_SPEED 380
-#define OBSTACLE_TURN_TICKS 250U
+#define OBSTACLE_TURN_TICKS 125U
 #define OBSTACLE_PASS_TICKS 450U
 #define OBSTACLE_RETURN_TICKS 250U
 
@@ -63,6 +63,10 @@ static uint8_t detector_valid_samples = 0U;
 static uint8_t detector_approach_decreases = 0U;
 static uint8_t detector_near_samples = 0U;
 static uint8_t detector_saw_far_sample = 0U;
+
+#ifdef OBSTACLE_AVOIDANCE_TEST
+static uint8_t obstacle_test_last_buzz_times = 0U;
+#endif
 
 static void ObstacleDetector_Reset(void)
 {
@@ -144,6 +148,15 @@ static void ObstacleAvoidance_SetSpeed(int16_t left_speed, int16_t right_speed)
 #endif
 }
 
+static void ObstacleAvoidance_StartBuzz(uint8_t times)
+{
+#ifndef OBSTACLE_AVOIDANCE_TEST
+    BuzzStartTimes(times);
+#else
+    obstacle_test_last_buzz_times = times;
+#endif
+}
+
 static uint8_t ObstacleAvoidance_ShouldStart(void)
 {
     uint16_t distance_mm;
@@ -192,9 +205,7 @@ uint8_t ObstacleAvoidance_Update2ms(void)
         obstacle_state = OBSTACLE_STATE_TURN_OUT;
         state_ticks = 0U;
         trigger_armed = 0U;
-#ifndef OBSTACLE_AVOIDANCE_TEST
-        BuzzStartOnce();
-#endif
+        ObstacleAvoidance_StartBuzz(1U);
     }
 
     switch (obstacle_state) {
@@ -225,6 +236,7 @@ uint8_t ObstacleAvoidance_Update2ms(void)
         if (state_ticks >= OBSTACLE_RETURN_TICKS) {
             obstacle_state = OBSTACLE_STATE_IDLE;
             state_ticks = 0U;
+            ObstacleAvoidance_StartBuzz(2U);
         }
         return 1U;
 
@@ -245,5 +257,15 @@ void ObstacleAvoidance_TestResetDetector(void)
 uint8_t ObstacleAvoidance_TestFeedSample(uint8_t valid, uint16_t distance_mm)
 {
     return ObstacleDetector_Feed(valid, distance_mm);
+}
+
+void ObstacleAvoidance_TestClearBuzz(void)
+{
+    obstacle_test_last_buzz_times = 0U;
+}
+
+uint8_t ObstacleAvoidance_TestGetLastBuzzTimes(void)
+{
+    return obstacle_test_last_buzz_times;
 }
 #endif
