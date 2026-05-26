@@ -111,6 +111,16 @@ static int expect_buzz_times(const char *name, uint8_t expected_times)
     return 0;
 }
 
+static int expect_enabled(const char *name, uint8_t expected_enabled)
+{
+    uint8_t actual_enabled = ObstacleAvoidance_IsEnabled();
+    if (actual_enabled != expected_enabled) {
+        printf("%s: expected enabled=%u, got %u\n", name, expected_enabled, actual_enabled);
+        return 1;
+    }
+    return 0;
+}
+
 int main(void)
 {
     int failed = 0;
@@ -137,6 +147,22 @@ int main(void)
     failed |= expect_no_trigger("stale resets approach", 0U, 0U);
     failed |= expect_no_trigger("near after stale", 1U, 120U);
     failed |= expect_no_trigger("near after stale again", 1U, 115U);
+
+    ObstacleAvoidance_Reset();
+    ObstacleAvoidance_SetEnabled(0U);
+    failed |= expect_enabled("disabled switch is readable", 0U);
+    ObstacleAvoidance_TestClearBuzz();
+    (void)ObstacleAvoidance_TestFeedSample(1U, 260U);
+    (void)ObstacleAvoidance_TestFeedSample(1U, 240U);
+    (void)ObstacleAvoidance_TestFeedSample(1U, 220U);
+    set_distance(200U);
+    failed |= expect_inactive_ticks("disabled obstacle avoidance ignores trigger", 5U);
+    failed |= expect_buzz_times("disabled obstacle avoidance stays silent", 0U);
+
+    ObstacleAvoidance_Reset();
+    failed |= expect_enabled("reset preserves disabled switch", 0U);
+    ObstacleAvoidance_SetEnabled(1U);
+    failed |= expect_enabled("enabled switch is readable", 1U);
 
     ObstacleAvoidance_Reset();
     ObstacleAvoidance_TestClearBuzz();

@@ -18,22 +18,26 @@
  * Tune OBSTACLE_TURN_TICKS for the small side angle, and tune
  * OBSTACLE_TRIANGLE_LEG_TICKS for how far the car travels before returning.
  */
-#define OBSTACLE_TRIGGER_MM 250U
-#define OBSTACLE_CLEAR_MM 600U
+#define OBSTACLE_TRIGGER_MM 200U
+#define OBSTACLE_CLEAR_MM 400U
 #define OBSTACLE_MIN_USABLE_MM 100U
-#define OBSTACLE_APPROACH_START_MM 260U
+#define OBSTACLE_APPROACH_START_MM 250U
 #define OBSTACLE_APPROACH_TOLERANCE_MM 10U
-#define OBSTACLE_MIN_APPROACH_SAMPLES 4U
-#define OBSTACLE_MIN_APPROACH_DECREASES 3U
+#define OBSTACLE_MIN_APPROACH_SAMPLES 3U
+#define OBSTACLE_MIN_APPROACH_DECREASES 2U
 #define OBSTACLE_NEAR_CONFIRM_SAMPLES 1U
 #define OBSTACLE_SIDE_SPEED 360
 #define OBSTACLE_FORWARD_SPEED 380
 #define OBSTACLE_FORWARD_LEFT_COMP 6
 #define OBSTACLE_FORWARD_RIGHT_COMP 0
 #define OBSTACLE_IDLE_CHECK_TICKS 5U
-#define OBSTACLE_TURN_TICKS 50U
+#define OBSTACLE_TURN_TICKS 60U
 #define OBSTACLE_TRIANGLE_LEG_TICKS 700U
-#define OBSTACLE_APEX_TURN_TICKS (OBSTACLE_TURN_TICKS * 2U)
+#define OBSTACLE_APEX_TURN_TICKS 70U
+
+#ifndef OBSTACLE_AVOIDANCE_DEFAULT_ENABLED
+#define OBSTACLE_AVOIDANCE_DEFAULT_ENABLED 1U
+#endif
 
 typedef enum {
     OBSTACLE_STATE_IDLE = 0,
@@ -48,6 +52,7 @@ static ObstacleState_t obstacle_state = OBSTACLE_STATE_IDLE;
 static uint16_t state_ticks = 0U;
 static uint8_t idle_check_ticks = 0U;
 static uint8_t trigger_armed = 1U;
+static uint8_t obstacle_enabled = (OBSTACLE_AVOIDANCE_DEFAULT_ENABLED != 0U) ? 1U : 0U;
 static uint32_t last_laser_sequence = 0U;
 
 static uint16_t detector_last_distance = 0U;
@@ -206,8 +211,25 @@ uint8_t ObstacleAvoidance_IsActive(void)
     return (obstacle_state != OBSTACLE_STATE_IDLE) ? 1U : 0U;
 }
 
+void ObstacleAvoidance_SetEnabled(uint8_t enabled)
+{
+    obstacle_enabled = (enabled != 0U) ? 1U : 0U;
+    if (!obstacle_enabled) {
+        ObstacleAvoidance_Reset();
+    }
+}
+
+uint8_t ObstacleAvoidance_IsEnabled(void)
+{
+    return obstacle_enabled;
+}
+
 uint8_t ObstacleAvoidance_Update2ms(void)
 {
+    if (!obstacle_enabled) {
+        return 0U;
+    }
+
     if (obstacle_state == OBSTACLE_STATE_IDLE) {
         if (idle_check_ticks < (uint8_t)(OBSTACLE_IDLE_CHECK_TICKS - 1U)) {
             idle_check_ticks++;

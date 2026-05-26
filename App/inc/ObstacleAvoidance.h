@@ -8,6 +8,8 @@ extern "C" {
 #include <stdint.h>
 
 void ObstacleAvoidance_Reset(void);
+void ObstacleAvoidance_SetEnabled(uint8_t enabled);
+uint8_t ObstacleAvoidance_IsEnabled(void);
 uint8_t ObstacleAvoidance_IsActive(void);
 uint8_t ObstacleAvoidance_Update2ms(void);
 

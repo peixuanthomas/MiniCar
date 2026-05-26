@@ -1,7 +1,6 @@
 --cpu Cortex-M3 --library_type=microlib --scatter c:/Mac/Home/Desktop/Car/MiniCar/build/MiniCar103/MiniCar103.sct --strict --summary_stderr --info summarysizes --map --xref --callgraph --symbols --info sizes --info totals --info unused --info veneers
 --list .\build\MiniCar103\MiniCar103.map
 .\build\MiniCar103\.obj\App\src\LineErrorFilter.o
-.\build\MiniCar103\.obj\App\src\LineRouteControl.o
 .\build\MiniCar103\.obj\App\src\ObstacleAvoidance.o
 .\build\MiniCar103\.obj\App\src\RunTimer.o
 .\build\MiniCar103\.obj\App\src\TaskMain.o

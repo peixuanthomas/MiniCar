@@ -716,13 +716,13 @@ I (../Bsp/inc/oled/oled_api.h)(0x6A128AEC)
 I (../Bsp/inc/adc_bat.h)(0x6A128AEC)
 I (../Bsp/inc/Motor.h)(0x6A128AEC)
 I (../App/inc/LineErrorFilter.h)(0x6A156C9E)
-I (../App/inc/ObstacleAvoidance.h)(0x6A15353F)
+I (../App/inc/ObstacleAvoidance.h)(0x6A15850B)
 I (../App/inc/TaskMain.h)(0x6A13F43A)
 F (..\App\src\LineErrorFilter.c)(0x6A156C9E)(--c99 -c --cpu Cortex-M3 -D__MICROLIB -g -O3 --apcs=interwork --split_sections -I ../Core/Inc -I ../Drivers/STM32F1xx_HAL_Driver/Inc/Legacy -I ../Drivers/STM32F1xx_HAL_Driver/Inc -I ../Drivers/CMSIS/Device/ST/STM32F1xx/Include -I ../Drivers/CMSIS/Include -I ../App/inc -I ../Bsp/inc -I ../Bsp/inc/oled --no-multibyte-chars-I.\RTE\_MiniCar103-IC:\Users\hanpeixuan\AppData\Local\Arm\Packs\ARM\CMSIS\5.8.0\CMSIS\Core\Include-IC:\Users\hanpeixuan\AppData\Local\Arm\Packs\Keil\STM32F1xx_DFP\2.4.1\Device\Include-D__UVISION_VERSION="535" -D_RTE_ -DSTM32F10X_MD -D_RTE_ -DUSE_HAL_DRIVER -DSTM32F103xB-o minicar103\lineerrorfilter.o --omf_browse minicar103\lineerrorfilter.crf --depend minicar103\lineerrorfilter.d)
 I (../App/inc/LineErrorFilter.h)(0x6A156C9E)
 I (C:\Keil_v5\ARM\ARMCC\include\stdint.h)(0x6025237E)
-F (..\App\src\ObstacleAvoidance.c)(0x6A158221)(--c99 -c --cpu Cortex-M3 -D__MICROLIB -g -O3 --apcs=interwork --split_sections -I ../Core/Inc -I ../Drivers/STM32F1xx_HAL_Driver/Inc/Legacy -I ../Drivers/STM32F1xx_HAL_Driver/Inc -I ../Drivers/CMSIS/Device/ST/STM32F1xx/Include -I ../Drivers/CMSIS/Include -I ../App/inc -I ../Bsp/inc -I ../Bsp/inc/oled --no-multibyte-chars-I.\RTE\_MiniCar103-IC:\Users\hanpeixuan\AppData\Local\Arm\Packs\ARM\CMSIS\5.8.0\CMSIS\Core\Include-IC:\Users\hanpeixuan\AppData\Local\Arm\Packs\Keil\STM32F1xx_DFP\2.4.1\Device\Include-D__UVISION_VERSION="535" -D_RTE_ -DSTM32F10X_MD -D_RTE_ -DUSE_HAL_DRIVER -DSTM32F103xB-o minicar103\obstacleavoidance.o --omf_browse minicar103\obstacleavoidance.crf --depend minicar103\obstacleavoidance.d)
-I (../App/inc/ObstacleAvoidance.h)(0x6A15353F)
+F (..\App\src\ObstacleAvoidance.c)(0x6A158513)(--c99 -c --cpu Cortex-M3 -D__MICROLIB -g -O3 --apcs=interwork --split_sections -I ../Core/Inc -I ../Drivers/STM32F1xx_HAL_Driver/Inc/Legacy -I ../Drivers/STM32F1xx_HAL_Driver/Inc -I ../Drivers/CMSIS/Device/ST/STM32F1xx/Include -I ../Drivers/CMSIS/Include -I ../App/inc -I ../Bsp/inc -I ../Bsp/inc/oled --no-multibyte-chars-I.\RTE\_MiniCar103-IC:\Users\hanpeixuan\AppData\Local\Arm\Packs\ARM\CMSIS\5.8.0\CMSIS\Core\Include-IC:\Users\hanpeixuan\AppData\Local\Arm\Packs\Keil\STM32F1xx_DFP\2.4.1\Device\Include-D__UVISION_VERSION="535" -D_RTE_ -DSTM32F10X_MD -D_RTE_ -DUSE_HAL_DRIVER -DSTM32F103xB-o minicar103\obstacleavoidance.o --omf_browse minicar103\obstacleavoidance.crf --depend minicar103\obstacleavoidance.d)
+I (../App/inc/ObstacleAvoidance.h)(0x6A15850B)
 I (C:\Keil_v5\ARM\ARMCC\include\stdint.h)(0x6025237E)
 I (../Bsp/inc/laser_distance.h)(0x6A13F05E)
 I (../Bsp/inc/Board.h)(0x6A13F05E)
