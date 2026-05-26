@@ -6,7 +6,9 @@
   */
 
 #include "UsrTimer.h"
+#include "LineErrorFilter.h"
 #include "ObstacleAvoidance.h"
+#include "TaskMain.h"
 #include "stdio.h"
 #include <stdbool.h>
 
@@ -88,7 +90,7 @@ extern volatile uint8_t oledProductMode;
 #define POOR_TRACKING_TIMEOUT        100  // 100 * 2ms = 200ms
 
 /* Sensor weights indexed by GetSen0Val()..GetSen7Val(). */
-static const int8_t sensor_pos[8] = {-7, -5, -5, -1, 1, 5, 5, 7};
+static const int8_t sensor_pos[8] = {-7, -5, -5, -3, 3, 5, 5, 7};
 
 /* ==================== PID state ==================== */
 static float integral              = 0.0f;
@@ -98,9 +100,9 @@ static float saved_error           = 0.0f;
 static int   lost_counter          = 0;
 static int   prev_left_speed       = 0;
 static int   prev_right_speed      = 0;
+static LineErrorFilter_t line_error_filter;
 
 /* ==================== Sensor state machine state ==================== */
-static int   last_state_correction = 0;
 static int   poor_tracking_counter = 0;
 static uint8_t backward_pulse_tick = 0;
 static bool  in_backward_mode = false;
@@ -150,8 +152,8 @@ static void reset_line_control_state(void)
     lost_counter = 0;
     prev_left_speed = 0;
     prev_right_speed = 0;
+    LineErrorFilter_Reset(&line_error_filter);
 
-    last_state_correction = 0;
     poor_tracking_counter = 0;
     backward_pulse_tick = 0;
     in_backward_mode = false;
@@ -372,7 +374,6 @@ static void run_sensor_state_control(void)
             lost_counter = 0;
             backward_pulse_tick = 0;
             correction = (black_count == 8) ? 0 : calc_sensor_state_correction(sen);
-            last_state_correction = correction;
             apply_sensor_state_speeds(correction, black_count);
         } else {
             apply_sensor_state_backward(black_count);
@@ -406,7 +407,6 @@ static void run_sensor_state_control(void)
 
     lost_counter = 0;
     correction = (black_count == 8) ? 0 : calc_sensor_state_correction(sen);
-    last_state_correction = correction;
     apply_sensor_state_speeds(correction, black_count);
 }
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
@@ -477,7 +477,21 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 
     if (black_count == 8) {
         error = 0.0f;
+        LineErrorFilter_Reset(&line_error_filter);
+        (void)LineErrorFilter_Update(&line_error_filter, error);
     } else {
+        LineErrorFilter_Result_t filtered_error = LineErrorFilter_Update(&line_error_filter, error);
+        error = filtered_error.error;
+
+        if (!filtered_error.accepted) {
+            publish_line_debug(error,
+                               (float)g_line_correction,
+                               prev_left_speed,
+                               prev_right_speed,
+                               black_count);
+            return;
+        }
+
         saved_error = error;
     }
 

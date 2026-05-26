@@ -121,34 +121,40 @@ int main(void)
     failed |= expect_no_trigger("second near sample without far approach", 1U, 95U);
 
     ObstacleAvoidance_TestResetDetector();
-    failed |= expect_no_trigger("approach 640", 1U, 640U);
-    failed |= expect_no_trigger("approach 620", 1U, 620U);
-    failed |= expect_no_trigger("first near under 500", 1U, 490U);
-    failed |= expect_trigger("confirmed near under 500", 1U, 460U);
+    failed |= expect_no_trigger("approach 260", 1U, 260U);
+    failed |= expect_no_trigger("approach 240", 1U, 240U);
+    failed |= expect_no_trigger("approach 220", 1U, 220U);
+    failed |= expect_no_trigger("still above 200", 1U, 201U);
 
     ObstacleAvoidance_TestResetDetector();
-    failed |= expect_no_trigger("near sample without approach", 1U, 460U);
+    failed |= expect_no_trigger("approach to 260", 1U, 260U);
+    failed |= expect_no_trigger("approach to 240", 1U, 240U);
+    failed |= expect_no_trigger("approach to 220", 1U, 220U);
+    failed |= expect_trigger("confirmed at 200", 1U, 200U);
+
+    ObstacleAvoidance_TestResetDetector();
+    failed |= expect_no_trigger("near sample without approach", 1U, 200U);
     failed |= expect_no_trigger("stale resets approach", 0U, 0U);
     failed |= expect_no_trigger("near after stale", 1U, 120U);
     failed |= expect_no_trigger("near after stale again", 1U, 115U);
 
     ObstacleAvoidance_Reset();
     ObstacleAvoidance_TestClearBuzz();
-    (void)ObstacleAvoidance_TestFeedSample(1U, 640U);
-    (void)ObstacleAvoidance_TestFeedSample(1U, 620U);
-    (void)ObstacleAvoidance_TestFeedSample(1U, 490U);
-    set_distance(460U);
+    (void)ObstacleAvoidance_TestFeedSample(1U, 260U);
+    (void)ObstacleAvoidance_TestFeedSample(1U, 240U);
+    (void)ObstacleAvoidance_TestFeedSample(1U, 220U);
+    set_distance(200U);
     failed |= expect_inactive_ticks("laser waits for lower-priority idle slot", 4U);
     failed |= ObstacleAvoidance_Update2ms() ? 0 : 1;
     failed |= expect_buzz_times("enter obstacle mode", 1U);
     failed |= expect_motor_speed("triangle step 1 starts turning out", -360, 360);
 
     ObstacleAvoidance_TestClearBuzz();
-    failed |= expect_active_ticks("triangle step 1 small turn out", 69U, -360, 360);
-    failed |= expect_active_ticks("triangle step 2 first equal leg", 700U, 380, 380);
-    failed |= expect_active_ticks("triangle step 3 obtuse apex turn", 140U, 360, -360);
-    failed |= expect_active_ticks("triangle step 4 second equal leg", 700U, 380, 380);
-    failed |= expect_active_ticks("triangle step 5 align with line", 70U, -360, 360);
+    failed |= expect_active_ticks("triangle step 1 small turn out", 49U, -360, 360);
+    failed |= expect_active_ticks("triangle step 2 first equal leg", 700U, 386, 380);
+    failed |= expect_active_ticks("triangle step 3 obtuse apex turn", 100U, 360, -360);
+    failed |= expect_active_ticks("triangle step 4 second equal leg", 700U, 386, 380);
+    failed |= expect_active_ticks("triangle step 5 align with line", 50U, -360, 360);
     failed |= expect_buzz_times("exit obstacle mode", 2U);
     if (ObstacleAvoidance_Update2ms()) {
         printf("triangle sequence: obstacle mode stayed active after final tick\n");

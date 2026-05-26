@@ -1,3 +1,5 @@
+.\build\MiniCar103\.obj\App\src\LineErrorFilter.o
+.\build\MiniCar103\.obj\App\src\LineRouteControl.o
 .\build\MiniCar103\.obj\App\src\ObstacleAvoidance.o
 .\build\MiniCar103\.obj\App\src\RunTimer.o
 .\build\MiniCar103\.obj\App\src\TaskMain.o

@@ -30,6 +30,8 @@
         "STM32F103xB"
     ],
     "sourceList": [
+        "App/src/LineErrorFilter.c",
+        "App/src/LineRouteControl.c",
         "App/src/ObstacleAvoidance.c",
         "App/src/RunTimer.c",
         "App/src/TaskMain.c",

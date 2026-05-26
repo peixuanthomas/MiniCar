@@ -1116,3 +1116,95 @@ These source files will be recompiled
 [2026-05-26 17:41:04]	[done]
 	build successfully !
 
+[2026-05-26 17:54:51]	[info] incremental build: 1 source files changed
+These source files will be recompiled
+---
+'c:\Mac\Home\Desktop\Car\MiniCar\App\src\UsrTimer.c': source file has been changed.
+
+[2026-05-26 17:54:51]	link failed !, exit code: 1
+   at unify_builder.Program.Main(String[] args_)
+---
+Error: L6218E: Undefined symbol LineErrorFilter_Reset (referred from UsrTimer.o).
+Error: L6218E: Undefined symbol LineErrorFilter_Update (referred from UsrTimer.o).
+Not enough information to list image symbols.
+Finished: 1 information, 0 warning and 2 error messages.
+
+
+[2026-05-26 17:55:30]	[info] incremental build: 1 source files changed
+These source files will be recompiled
+---
+'c:\Mac\Home\Desktop\Car\MiniCar\App\src\LineErrorFilter.c': object (.o) file not exist
+
+[2026-05-26 17:55:31]	[done]
+	build successfully !
+
+[2026-05-26 17:55:45]	[done]
+	build successfully !
+
+[2026-05-26 18:05:59]	[info] incremental build: 1 source files changed
+These source files will be recompiled
+---
+'c:\Mac\Home\Desktop\Car\MiniCar\App\src\ObstacleAvoidance.c': source file has been changed.
+
+[2026-05-26 18:05:59]	[done]
+	build successfully !
+
+[2026-05-26 18:23:02]	[done]
+	build successfully !
+
+[2026-05-26 18:23:20]	[done]
+	build successfully !
+
+[2026-05-26 18:24:30]	[done]
+	build successfully !
+
+[2026-05-26 18:25:19]	[done]
+	build successfully !
+
+[2026-05-26 18:25:33]	[done]
+	build successfully !
+
+[2026-05-26 18:33:05]	[done]
+	build successfully !
+
+[2026-05-26 18:34:14]	[done]
+	build successfully !
+
+[2026-05-26 18:42:40]	[done]
+	build successfully !
+
+[2026-05-26 18:44:23]	[done]
+	build successfully !
+
+[2026-05-26 18:45:02]	[info] incremental build: 1 source files changed
+These source files will be recompiled
+---
+'c:\Mac\Home\Desktop\Car\MiniCar\App\src\ObstacleAvoidance.c': source file has been changed.
+
+[2026-05-26 18:45:03]	[done]
+	build successfully !
+
+[2026-05-26 19:17:28]	[info] incremental build: 1 source files changed
+These source files will be recompiled
+---
+'c:\Mac\Home\Desktop\Car\MiniCar\App\src\ObstacleAvoidance.c': source file has been changed.
+
+[2026-05-26 19:17:28]	[done]
+	build successfully !
+
+[2026-05-26 19:20:58]	[info] incremental build: 1 source files changed
+These source files will be recompiled
+---
+'c:\Mac\Home\Desktop\Car\MiniCar\App\src\ObstacleAvoidance.c': source file has been changed.
+
+[2026-05-26 19:20:59]	[done]
+	build successfully !
+
+[2026-05-26 19:21:06]	[info] incremental build: 1 source files changed
+These source files will be recompiled
+---
+'c:\Mac\Home\Desktop\Car\MiniCar\App\src\ObstacleAvoidance.c': source file has been changed.
+
+[2026-05-26 19:21:07]	[done]
+	build successfully !
+

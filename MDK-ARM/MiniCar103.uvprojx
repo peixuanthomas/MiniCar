@@ -779,6 +779,11 @@
               <FilePath>..\App\src\UsrTimer.c</FilePath>
             </File>
             <File>
+              <FileName>LineErrorFilter.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\App\src\LineErrorFilter.c</FilePath>
+            </File>
+            <File>
               <FileName>ObstacleAvoidance.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\App\src\ObstacleAvoidance.c</FilePath>

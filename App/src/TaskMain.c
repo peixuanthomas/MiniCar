@@ -101,7 +101,7 @@ TASK_COMPONENTS TaskComps[TASK_MAX] = {
 	{0, 5, 10, OLED_Update_InPages},	//OLED屏的刷新任务
 	{0, 3, 100, BuzzFunc},
 	{0, 4, 100, Uart1Func},
-	{0, 8, 100, LaserDistanceFunc},
+	{0, 8, 50, LaserDistanceFunc},
 	{0, 4, 50, ChkSenFunc},
 	{0, 4, 500, AdcReadTask},
 	{0, 3, 1000, Led1Func},
@@ -233,7 +233,7 @@ void Uart1Func(void)
 
 /** Laser distance task
   * @brief  Poll ATK-MS53L0M distance data on UART3.
-  *         Runs every 100ms.
+  *         Runs every 50ms.
   * @param  None
   * @retval None
   */

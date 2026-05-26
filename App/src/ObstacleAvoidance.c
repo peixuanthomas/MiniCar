@@ -18,14 +18,14 @@
  * Tune OBSTACLE_TURN_TICKS for the small side angle, and tune
  * OBSTACLE_TRIANGLE_LEG_TICKS for how far the car travels before returning.
  */
-#define OBSTACLE_TRIGGER_MM 600U
-#define OBSTACLE_CLEAR_MM 370U
-#define OBSTACLE_MIN_USABLE_MM 40U
-#define OBSTACLE_APPROACH_START_MM 650U
-#define OBSTACLE_APPROACH_TOLERANCE_MM 15U
-#define OBSTACLE_MIN_APPROACH_SAMPLES 3U
+#define OBSTACLE_TRIGGER_MM 250U
+#define OBSTACLE_CLEAR_MM 600U
+#define OBSTACLE_MIN_USABLE_MM 100U
+#define OBSTACLE_APPROACH_START_MM 260U
+#define OBSTACLE_APPROACH_TOLERANCE_MM 10U
+#define OBSTACLE_MIN_APPROACH_SAMPLES 4U
 #define OBSTACLE_MIN_APPROACH_DECREASES 3U
-#define OBSTACLE_NEAR_CONFIRM_SAMPLES 3U
+#define OBSTACLE_NEAR_CONFIRM_SAMPLES 1U
 #define OBSTACLE_SIDE_SPEED 360
 #define OBSTACLE_FORWARD_SPEED 380
 #define OBSTACLE_FORWARD_LEFT_COMP 6
@@ -79,8 +79,8 @@ static void ObstacleDetector_StartTrack(uint16_t distance_mm)
     detector_has_last = 1U;
     detector_valid_samples = 1U;
     detector_approach_decreases = 0U;
-    detector_near_samples = (distance_mm < OBSTACLE_TRIGGER_MM) ? 1U : 0U;
-    detector_saw_far_sample = (distance_mm >= OBSTACLE_TRIGGER_MM) ? 1U : 0U;
+    detector_near_samples = (distance_mm <= OBSTACLE_TRIGGER_MM) ? 1U : 0U;
+    detector_saw_far_sample = (distance_mm > OBSTACLE_TRIGGER_MM) ? 1U : 0U;
 }
 
 static uint8_t ObstacleDetector_Feed(uint8_t valid, uint16_t distance_mm)
@@ -112,7 +112,7 @@ static uint8_t ObstacleDetector_Feed(uint8_t valid, uint16_t distance_mm)
         }
     }
 
-    if (distance_mm >= OBSTACLE_TRIGGER_MM) {
+    if (distance_mm > OBSTACLE_TRIGGER_MM) {
         detector_saw_far_sample = 1U;
         detector_near_samples = 0U;
     } else if (detector_near_samples < 255U) {
