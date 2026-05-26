@@ -1,3 +1,16 @@
+>>> info
+
+Compiler Full Name: Component: ARM Compiler 5.06 update 7 (build 960)
+Compiler Version: 5.06
+Builder Mode: Incremental
+The amount of C files: 1
+The amount of C++ files: 0
+The amount of Asm files: 0
+
+>>> prebuild
+
+
+
 >>> cc
 
 ".\App\src\UsrTimer.c", line 103: Warning:  #550-D: variable "last_state_correction"  was set but never used
@@ -7,4 +20,8 @@
 
 >>> ld
 
-Program Size: Code=20086 RO-data=3354 RW-data=916 ZI-data=2548  
+Program Size: Code=20198 RO-data=3354 RW-data=916 ZI-data=2548  
+
+
+>>> postbuild
+

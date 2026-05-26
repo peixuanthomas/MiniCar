@@ -8,6 +8,7 @@ extern "C" {
 #include <stdint.h>
 
 void ObstacleAvoidance_Reset(void);
+uint8_t ObstacleAvoidance_IsActive(void);
 uint8_t ObstacleAvoidance_Update2ms(void);
 
 #ifdef OBSTACLE_AVOIDANCE_TEST
@@ -15,6 +16,8 @@ void ObstacleAvoidance_TestResetDetector(void);
 uint8_t ObstacleAvoidance_TestFeedSample(uint8_t valid, uint16_t distance_mm);
 void ObstacleAvoidance_TestClearBuzz(void);
 uint8_t ObstacleAvoidance_TestGetLastBuzzTimes(void);
+int16_t ObstacleAvoidance_TestGetLeftSpeed(void);
+int16_t ObstacleAvoidance_TestGetRightSpeed(void);
 #endif
 
 #ifdef __cplusplus

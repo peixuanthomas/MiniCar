@@ -54,7 +54,7 @@ extern volatile uint8_t oledProductMode;
 /* 原 SPEED_COMPENSATION 用于 sensor_state 和直行测试模式 */
 #define SPEED_COMPENSATION 4
 
-#define KP                2.0f
+#define KP                15.0f
 #define KI                0.0f    /* 微量积分消除稳态偏差 */
 #define KD                1.2f
 #define INTEGRAL_MAX      40.0f    /* 积分限幅 */
@@ -67,15 +67,15 @@ extern volatile uint8_t oledProductMode;
 #define INTEGRATE_THRESHOLD 3.0f
 
 /* 最大加速度: 每 2ms tick 速度最大变化量 */
-#define MAX_ACCEL_DELTA   30
+#define MAX_ACCEL_DELTA   50
 
 #define LOST_LINE_TIMEOUT 30      // 30 * 2ms = 60ms
 #define SEARCH_SPEED      250
 
 #define SENSOR_STATE_BASE_SPEED         330
 /* Minimum PWM that can move a wheel; use 0 for stop/pivot instead of low PWM. */
-#define SENSOR_STATE_MIN_SPEED          400
-#define SENSOR_STATE_MAX_SPEED          600
+#define SENSOR_STATE_MIN_SPEED          420
+#define SENSOR_STATE_MAX_SPEED          550
 #define SENSOR_STATE_FINE_CORRECTION    90
 #define SENSOR_STATE_SMALL_CORRECTION   120
 #define SENSOR_STATE_MEDIUM_CORRECTION  210
@@ -180,6 +180,26 @@ static int count_line_sensors(const bool sen[8])
     }
 
     return cnt;
+}
+
+static bool line_needs_immediate_control(const bool sen[8], int black_count)
+{
+    bool has_center = sen[3] || sen[4];
+    bool has_near = sen[2] || sen[5];
+
+    return (black_count == 0) ||
+           (!has_center && !has_near && (black_count <= 1));
+}
+
+static bool line_should_defer_obstacle_start(void)
+{
+    bool sen[8];
+    int black_count;
+
+    read_line_sensors(sen);
+    black_count = count_line_sensors(sen);
+
+    return line_needs_immediate_control(sen, black_count);
 }
 
 static void calc_sensor_error(float *error, int *count)
@@ -403,8 +423,10 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
         return;
     }
 
-    if (ObstacleAvoidance_Update2ms()) {
-        return;
+    if (ObstacleAvoidance_IsActive() || !line_should_defer_obstacle_start()) {
+        if (ObstacleAvoidance_Update2ms()) {
+            return;
+        }
     }
 
     if (use_sensor_state_control) {

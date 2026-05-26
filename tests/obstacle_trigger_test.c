@@ -22,12 +22,11 @@ uint32_t LaserDistance_GetValidSequence(void)
     return laser_sequence;
 }
 
-static uint8_t update_with_distance(uint16_t distance_mm)
+static void set_distance(uint16_t distance_mm)
 {
     laser_valid = 1U;
     laser_distance_mm = distance_mm;
     laser_sequence++;
-    return ObstacleAvoidance_Update2ms();
 }
 
 static int expect_no_trigger(const char *name, uint8_t valid, uint16_t distance_mm)
@@ -46,6 +45,60 @@ static int expect_trigger(const char *name, uint8_t valid, uint16_t distance_mm)
         return 1;
     }
     return 0;
+}
+
+static int expect_motor_speed(const char *name, int16_t expected_left, int16_t expected_right)
+{
+    int16_t actual_left = ObstacleAvoidance_TestGetLeftSpeed();
+    int16_t actual_right = ObstacleAvoidance_TestGetRightSpeed();
+
+    if ((actual_left != expected_left) || (actual_right != expected_right)) {
+        printf("%s: expected L=%d R=%d, got L=%d R=%d\n",
+               name,
+               expected_left,
+               expected_right,
+               actual_left,
+               actual_right);
+        return 1;
+    }
+    return 0;
+}
+
+static int expect_active_tick(const char *name, int16_t expected_left, int16_t expected_right)
+{
+    if (!ObstacleAvoidance_Update2ms()) {
+        printf("%s: obstacle mode ended early\n", name);
+        return 1;
+    }
+
+    return expect_motor_speed(name, expected_left, expected_right);
+}
+
+static int expect_active_ticks(const char *name, uint16_t ticks, int16_t expected_left, int16_t expected_right)
+{
+    uint16_t i;
+    int failed = 0;
+
+    for (i = 0U; i < ticks; i++) {
+        failed |= expect_active_tick(name, expected_left, expected_right);
+    }
+
+    return failed;
+}
+
+static int expect_inactive_ticks(const char *name, uint16_t ticks)
+{
+    uint16_t i;
+    int failed = 0;
+
+    for (i = 0U; i < ticks; i++) {
+        if (ObstacleAvoidance_Update2ms()) {
+            printf("%s: obstacle mode stayed active at tick %u\n", name, (unsigned)i);
+            failed = 1;
+        }
+    }
+
+    return failed;
 }
 
 static int expect_buzz_times(const char *name, uint8_t expected_times)
@@ -70,30 +123,37 @@ int main(void)
     ObstacleAvoidance_TestResetDetector();
     failed |= expect_no_trigger("approach 640", 1U, 640U);
     failed |= expect_no_trigger("approach 620", 1U, 620U);
-    failed |= expect_no_trigger("first near under 600", 1U, 585U);
-    failed |= expect_no_trigger("second near under 600", 1U, 550U);
-    failed |= expect_trigger("confirmed near under 600", 1U, 540U);
+    failed |= expect_no_trigger("first near under 500", 1U, 490U);
+    failed |= expect_trigger("confirmed near under 500", 1U, 460U);
 
     ObstacleAvoidance_TestResetDetector();
-    failed |= expect_no_trigger("near sample without approach", 1U, 560U);
+    failed |= expect_no_trigger("near sample without approach", 1U, 460U);
     failed |= expect_no_trigger("stale resets approach", 0U, 0U);
     failed |= expect_no_trigger("near after stale", 1U, 120U);
     failed |= expect_no_trigger("near after stale again", 1U, 115U);
 
     ObstacleAvoidance_Reset();
     ObstacleAvoidance_TestClearBuzz();
-    (void)update_with_distance(640U);
-    (void)update_with_distance(620U);
-    (void)update_with_distance(585U);
-    (void)update_with_distance(550U);
-    failed |= update_with_distance(540U) ? 0 : 1;
+    (void)ObstacleAvoidance_TestFeedSample(1U, 640U);
+    (void)ObstacleAvoidance_TestFeedSample(1U, 620U);
+    (void)ObstacleAvoidance_TestFeedSample(1U, 490U);
+    set_distance(460U);
+    failed |= expect_inactive_ticks("laser waits for lower-priority idle slot", 4U);
+    failed |= ObstacleAvoidance_Update2ms() ? 0 : 1;
     failed |= expect_buzz_times("enter obstacle mode", 1U);
+    failed |= expect_motor_speed("triangle step 1 starts turning out", -360, 360);
 
     ObstacleAvoidance_TestClearBuzz();
-    for (uint16_t i = 0U; i < 1000U; i++) {
-        (void)ObstacleAvoidance_Update2ms();
-    }
+    failed |= expect_active_ticks("triangle step 1 small turn out", 69U, -360, 360);
+    failed |= expect_active_ticks("triangle step 2 first equal leg", 700U, 380, 380);
+    failed |= expect_active_ticks("triangle step 3 obtuse apex turn", 140U, 360, -360);
+    failed |= expect_active_ticks("triangle step 4 second equal leg", 700U, 380, 380);
+    failed |= expect_active_ticks("triangle step 5 align with line", 70U, -360, 360);
     failed |= expect_buzz_times("exit obstacle mode", 2U);
+    if (ObstacleAvoidance_Update2ms()) {
+        printf("triangle sequence: obstacle mode stayed active after final tick\n");
+        failed = 1;
+    }
 
     if (failed) {
         return 1;
