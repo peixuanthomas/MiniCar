@@ -48,7 +48,7 @@ extern volatile uint8_t oledProductMode;
 #define STRAIGHT_TEST_SPEED BASE_SPEED
 
 /* 左右轮独立漂移补偿 (正值=该轮加速) */
-#define LEFT_DRIFT_COMP   4
+#define LEFT_DRIFT_COMP   6
 #define RIGHT_DRIFT_COMP  0
 
 /* 原 SPEED_COMPENSATION 用于 sensor_state 和直行测试模式 */
@@ -82,13 +82,13 @@ extern volatile uint8_t oledProductMode;
 #define SENSOR_STATE_HARD_CORRECTION    230
 #define SENSOR_STATE_SEARCH_SPEED       400
 /* Backward recovery uses short 330-PWM pulses to avoid continuous fast reverse. */
-#define SENSOR_STATE_BACKWARD_SPEED     350
+#define SENSOR_STATE_BACKWARD_SPEED     340
 #define SENSOR_STATE_BACKWARD_ON_TICKS  2
 #define SENSOR_STATE_BACKWARD_PERIOD_TICKS 10
 #define POOR_TRACKING_TIMEOUT        100  // 100 * 2ms = 200ms
 
 /* Sensor weights indexed by GetSen0Val()..GetSen7Val(). */
-static const int8_t sensor_pos[8] = {-7, -5, -3, -1, 1, 3, 5, 7};
+static const int8_t sensor_pos[8] = {-7, -5, -5, -1, 1, 5, 5, 7};
 
 /* ==================== PID state ==================== */
 static float integral              = 0.0f;
